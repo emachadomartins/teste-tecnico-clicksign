@@ -11,12 +11,12 @@ import (
 
 func main() {
 	config := config.Load()
-	router := router.New(config.AllowedOrigins)
+	r := router.New(config.AllowedOrigins)
 
 	l := utils.NewLogger("api")
 
 	l.Info("🔥 Starting server on port %s", config.Port)
-	if err := http.ListenAndServe(config.Port, router); err != nil {
+	if err := http.ListenAndServe(config.Port, r); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
 

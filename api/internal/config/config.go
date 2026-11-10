@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"gerenciador-de-projetos-back/internal/model"
 	"gerenciador-de-projetos-back/internal/utils"
 	"os"
 	"strings"
@@ -36,22 +35,20 @@ func Load() Config {
 	l.Info("Loading Environment Variables")
 
 	if e := godotenv.Load(); e != nil {
-		model.ValidateError(fmt.Errorf("no .env file found, relying on environment variables"), true, l)
+		utils.ThrowWarning(fmt.Errorf("no .env file found, relying on environment variables"), l)
 	}
 
 	port, err := loadEnv("PORT", false, "8080", l)
-	if err != nil {
-		model.ValidateError(err, false, l)
-	}
+
+	utils.ValidateError(err, false, l)
 
 	if port[0] != ':' {
 		port = ":" + port
 	}
 
 	allowedOrigins, err := loadEnv("ALLOWED_ORIGINS", false, "http://localhost:5000,http://127.0.0.1:5000", l)
-	if err != nil {
-		model.ValidateError(err, false, l)
-	}
+
+	utils.ValidateError(err, false, l)
 
 	return Config{
 		Port:           port,

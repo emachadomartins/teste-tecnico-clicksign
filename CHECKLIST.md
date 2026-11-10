@@ -8,7 +8,7 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 
 ## 🏗️ Setup
 
-- [ ] Inicializar repositório Git
+- [x] Inicializar repositório Git
 - [ ] Criar estrutura de pastas do projeto do backend (Go)
 - [ ] Criar estrutura de pastas do projeto do frontend (React)
 - [ ] Configurar banco de dados
