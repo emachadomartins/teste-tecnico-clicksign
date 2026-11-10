@@ -3,8 +3,8 @@ module gerenciador-de-projetos-back
 go 1.27.3
 
 require (
-	github.com/go-chi/chi/v5 v5.5.0
-	gorm.io/gorm v1.31.2
+	github.com/go-chi/chi v1.5.5
+	github.com/go-chi/cors v1.2.2
 )
 
 require (
@@ -20,8 +20,6 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
 	github.com/gohugoio/hugo v0.164.0 // indirect
-	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
