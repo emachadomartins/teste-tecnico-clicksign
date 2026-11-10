@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gerenciador-de-projetos-back/internal/model"
 	"gerenciador-de-projetos-back/internal/utils"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -80,6 +81,7 @@ func (s *ProjectService) Update(id uuid.UUID, p model.ProjectPayload) (*model.Pr
 			if err != nil {
 				return nil, err
 			}
+			newProject.UpdatedAt = time.Now()
 			s.projects[i] = newProject
 
 			return &s.projects[i], nil

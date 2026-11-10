@@ -9,4 +9,5 @@ export type Project = {
 
 export type ProjectCardProps = {
   project: Project;
+  onToggleFavorite: (project: Project) => void;
 };

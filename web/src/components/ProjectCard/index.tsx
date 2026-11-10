@@ -2,7 +2,7 @@ import {
   CalendarCheck,
   CalendarPlus,
   Ellipsis,
-  ImageOff,
+  Layers,
   Star,
 } from "lucide-react";
 import React from "react";
@@ -12,15 +12,8 @@ import type { ProjectCardProps } from "./types";
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
+  onToggleFavorite,
 }: ProjectCardProps) => {
-  const [favorited, setFavorited] = React.useState(
-    project.isFavorited || false,
-  );
-
-  const handleFavoriteClick = () => {
-    setFavorited(!favorited);
-  };
-
   return (
     <li className="project-card-container">
       <div className="project-cover">
@@ -32,24 +25,27 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           />
         ) : (
           <div className="project-image-placeholder" aria-hidden="true">
-            <ImageOff size={64} />
+            <Layers size={80} />
           </div>
         )}
         <div className="project-actions">
-          <button aria-label="Favoritar" onClick={handleFavoriteClick}>
+          <button
+            aria-label="Favoritar"
+            onClick={() => onToggleFavorite(project)}
+          >
             <Star
-              size={32}
+              size={28}
               color="#FFFFFF"
-              fill={favorited ? "#FFB23D" : "none"}
+              fill={project.isFavorited ? "#FFB23D" : "none"}
             />
           </button>
           <button className="ellipsis-button" aria-label="Mais opções">
-            <Ellipsis size={32} color="#1C1930" fill="#FFFFFF" />
+            <Ellipsis size={20} color="#1C1930" fill="#FFFFFF" />
           </button>
         </div>
       </div>
       <article className="project-card">
-        <h2 className="project-name">{project.name}</h2>
+        <p className="project-name">{project.name}</p>
         <p className="project-description">
           <b>Cliente:</b> {project.client}
         </p>

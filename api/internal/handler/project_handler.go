@@ -32,7 +32,7 @@ func (h *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, project, h.logger)
+	respondSingle(w, http.StatusCreated, project, h.logger)
 }
 
 func (h *ProjectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func (h *ProjectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, project, h.logger)
+	respondSingle(w, http.StatusOK, project, h.logger)
 }
 
 func (h *ProjectHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +65,7 @@ func (h *ProjectHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, project, h.logger)
+	respondSingle(w, http.StatusOK, project, h.logger)
 }
 
 func (h *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {

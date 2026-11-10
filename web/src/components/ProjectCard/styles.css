@@ -2,7 +2,7 @@
   list-style: none;
   background: #ffffff;
   border-radius: 16px;
-  width: 380px;
+  height: 430px;
 }
 
 .project-card {
@@ -12,7 +12,7 @@
 
 .project-cover {
   position: relative;
-  height: 250px;
+  height: 230px;
   border-radius: 16px 16px 0 0;
   overflow: hidden;
 }
@@ -74,6 +74,8 @@
   font-weight: 700;
   font-size: 24px;
   line-height: 25px;
+
+  margin-top: 0;
 
   color: #1f1283;
 }

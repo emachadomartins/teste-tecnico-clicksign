@@ -10,9 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type ListResult[T any] struct {
-	Items []T
-	Total int64
+type ResultMetadata struct {
+	Total int `json:"total,omitempty"`
+	Page  int `json:"page,omitempty"`
+}
+
+type Result[T any] struct {
+	Data     T              `json:"data"`
+	Metadata ResultMetadata `json:"metadata,omitzero"`
+	Error    string         `json:"error,omitempty"`
 }
 
 func decodeBodyJson[T any](r *http.Request) (T, error) {
@@ -34,7 +40,7 @@ func parseIDFromRequest(r *http.Request) (uuid.UUID, error) {
 	return id, nil
 }
 
-func respondJSON[T any](w http.ResponseWriter, status int, response T, logger *utils.LoggerImpl) {
+func respondJSON[T any](w http.ResponseWriter, status int, response Result[T], logger *utils.LoggerImpl) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	r, err := json.MarshalIndent(response, "", "  ")
@@ -48,12 +54,24 @@ func respondJSON[T any](w http.ResponseWriter, status int, response T, logger *u
 	logger.Info("response: %s\n", r)
 }
 
+func respondSingle[T any](w http.ResponseWriter, status int, item T, logger *utils.LoggerImpl) {
+	logger.Info("Responding with single item")
+
+	response := Result[T]{
+		Data: item,
+	}
+
+	respondJSON(w, status, response, logger)
+}
+
 func respondList[T any](w http.ResponseWriter, items []T, logger *utils.LoggerImpl) {
 	logger.Info("Responding with list of %d items", len(items))
 
-	response := ListResult[T]{
-		Items: items,
-		Total: int64(len(items)),
+	response := Result[[]T]{
+		Data: items,
+		Metadata: ResultMetadata{
+			Total: len(items),
+		},
 	}
 
 	respondJSON(w, http.StatusOK, response, logger)
@@ -61,7 +79,12 @@ func respondList[T any](w http.ResponseWriter, items []T, logger *utils.LoggerIm
 
 func respondError(w http.ResponseWriter, status int, err error, logger *utils.LoggerImpl) {
 	logger.Error(err.Error())
-	respondJSON(w, status, map[string]string{"error": err.Error()}, logger)
+	msg := err.Error()
+	response := Result[any]{
+		Error: msg,
+	}
+
+	respondJSON(w, status, response, logger)
 }
 
 type HandlerFn func(w http.ResponseWriter, r *http.Request)

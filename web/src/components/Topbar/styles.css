@@ -1,9 +1,14 @@
 .top-bar {
+  --top-bar-height: 72px; /* use a altura do Figma */
+  position: relative; /* referência para o overlay */
+
+  position: relative;
+  height: var(--top-bar-height);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   background: #1c1930;
   align-items: center;
-  padding: 4px;
+  padding: 4px 64px;
 }
 
 .top-bar .logo {
@@ -16,4 +21,108 @@
   background: none;
   border: none;
   cursor: pointer;
+}
+
+.search-overlay {
+  position: absolute;
+  inset: 0; /* cobre a top-bar inteira: top, right, bottom e left = 0 */
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 32px; /* o mesmo padding lateral da top-bar */
+  background: #ffffff;
+  color: #1c1930;
+  border-radius: 32px;
+  border: 2px solid #695ccd;
+}
+.search-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0; /* sem bottom: a altura vem do conteúdo */
+  z-index: 10; /* fica por cima dos cards */
+
+  background: #ffffff;
+  color: #1c1930;
+  border: 2px solid #695ccd;
+  border-radius: 32px;
+  overflow: hidden; /* o histórico respeita os cantos arredondados */
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 18px;
+  color: inherit;
+
+  font-family: "Encode Sans Semi Expanded";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+
+  color: #8c8b93;
+}
+
+.search-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0; /* sem bottom: a altura vem do conteúdo */
+  z-index: 10; /* fica por cima dos cards */
+
+  background: #ffffff;
+  color: #1c1930;
+  border: 2px solid #695ccd;
+  border-radius: 32px;
+  overflow: hidden; /* o histórico respeita os cantos arredondados */
+}
+
+/* Linha do input: mesma altura da top-bar */
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--top-bar-height);
+  padding: 0 32px;
+  box-sizing: border-box;
+}
+
+/* Histórico: agora é um filho normal da caixa, sem posicionamento */
+.search-history {
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  border-top: 1px solid #e5e5e5; /* separa o input dos resultados */
+}
+
+.search-history-item {
+  border-bottom: 1px solid #f4f2ff; /* só a linha divisória fica no li */
+}
+
+.search-history-button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%; /* ocupa toda a largura do item */
+  height: var(--top-bar-height); /* veio do li */
+  padding: 0 32px;
+
+  grid-column: 3;
+  justify-self: end;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 16px;
+
+  color: #717171;
 }

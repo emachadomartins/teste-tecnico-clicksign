@@ -1,9 +1,16 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+html {
+  scrollbar-gutter: stable;
 }
 
 body {
   margin: 0;
+  font-family: "Encode Sans Semi Expanded", sans-serif;
+  background: #f4f2ff;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
