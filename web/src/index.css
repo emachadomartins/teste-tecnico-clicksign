@@ -1,9 +1,9 @@
-html {
-  scrollbar-gutter: stable;
-}
-
-body {
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
+  overflow: hidden;
   font-family: "Encode Sans Semi Expanded", sans-serif;
   background: #f4f2ff;
 }

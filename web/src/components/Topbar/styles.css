@@ -1,6 +1,7 @@
 .top-bar {
-  --top-bar-height: 72px; /* use a altura do Figma */
-  position: relative; /* referência para o overlay */
+  --top-bar-height: 72px;
+  position: relative;
+  z-index: 100;
 
   position: relative;
   height: var(--top-bar-height);
@@ -25,11 +26,11 @@
 
 .search-overlay {
   position: absolute;
-  inset: 0; /* cobre a top-bar inteira: top, right, bottom e left = 0 */
+  inset: 0;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 0 32px; /* o mesmo padding lateral da top-bar */
+  padding: 0 32px;
   background: #ffffff;
   color: #1c1930;
   border-radius: 32px;
@@ -39,14 +40,14 @@
   position: absolute;
   top: 0;
   left: 0;
-  right: 0; /* sem bottom: a altura vem do conteúdo */
-  z-index: 10; /* fica por cima dos cards */
+  right: 0;
+  z-index: 10;
 
   background: #ffffff;
   color: #1c1930;
   border: 2px solid #695ccd;
   border-radius: 32px;
-  overflow: hidden; /* o histórico respeita os cantos arredondados */
+  overflow: hidden;
 }
 
 .search-input {
@@ -73,17 +74,16 @@
   position: absolute;
   top: 0;
   left: 0;
-  right: 0; /* sem bottom: a altura vem do conteúdo */
-  z-index: 10; /* fica por cima dos cards */
+  right: 0;
+  z-index: 10;
 
   background: #ffffff;
   color: #1c1930;
   border: 2px solid #695ccd;
   border-radius: 32px;
-  overflow: hidden; /* o histórico respeita os cantos arredondados */
+  overflow: hidden;
 }
 
-/* Linha do input: mesma altura da top-bar */
 .search-field {
   display: flex;
   align-items: center;
@@ -93,24 +93,23 @@
   box-sizing: border-box;
 }
 
-/* Histórico: agora é um filho normal da caixa, sem posicionamento */
 .search-history {
   margin: 0;
   padding: 8px 0;
   list-style: none;
-  border-top: 1px solid #e5e5e5; /* separa o input dos resultados */
+  border-top: 1px solid #e5e5e5;
 }
 
 .search-history-item {
-  border-bottom: 1px solid #f4f2ff; /* só a linha divisória fica no li */
+  border-bottom: 1px solid #f4f2ff;
 }
 
 .search-history-button {
   display: flex;
   align-items: center;
   gap: 16px;
-  width: 100%; /* ocupa toda a largura do item */
-  height: var(--top-bar-height); /* veio do li */
+  width: 100%;
+  height: var(--top-bar-height);
   padding: 0 32px;
 
   grid-column: 3;

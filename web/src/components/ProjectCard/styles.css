@@ -14,7 +14,6 @@
   position: relative;
   height: 230px;
   border-radius: 16px 16px 0 0;
-  overflow: hidden;
 }
 
 .project-image {
@@ -34,6 +33,11 @@
   color: #ffffff;
 }
 
+.project-image,
+.project-image-placeholder {
+  border-radius: 16px 16px 0 0;
+}
+
 .project-actions {
   position: absolute;
   bottom: 16px;
@@ -42,7 +46,7 @@
   gap: 8px;
 }
 
-.project-actions button {
+.project-actions > button {
   background: none;
   border: none;
   padding: 0;
@@ -51,25 +55,17 @@
   font: inherit;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
-.project-actions .ellipsis-button {
-  height: 32px;
-  width: 32px;
-  border-radius: 100%;
-  background: #f4f2ff;
+.project-actions .ellipsis-button svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
 }
 
-.project-actions .favorite-button {
-  height: 32px;
-  width: 32px;
-  border-radius: 100%;
-  background: #f4f2ff;
+.project-actions .favorite-button svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
 }
 
 .project-name {
-  font-family: "Encode Sans Semi Expanded";
   font-style: normal;
   font-weight: 700;
   font-size: 24px;
@@ -81,7 +77,6 @@
 }
 
 .project-description {
-  font-family: "Encode Sans Semi Expanded";
   font-style: normal;
   font-weight: 400;
   font-size: 18px;
@@ -108,4 +103,40 @@
   font-size: 16px;
   line-height: 20px;
   color: #717171;
+}
+
+.card-menu {
+  position: relative; /* referência para o menu */
+}
+
+.card-menu-options {
+  justify-content: flex-start;
+
+  position: absolute;
+  top: calc(100% + 8px); /* logo abaixo do botão "..." */
+  right: 0; /* alinhado pela direita com o botão */
+  z-index: 30; /* por cima dos cards vizinhos */
+
+  min-width: 240px;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: #695ccd;
 }

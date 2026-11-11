@@ -10,4 +10,6 @@ export type Project = {
 export type ProjectCardProps = {
   project: Project;
   onToggleFavorite: (project: Project) => void;
+  onMenuOpen: (project: Project) => void;
+  onMenuClose: () => void;
 };

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { ProjectCard } from "../../components/ProjectCard";
 import "./styles.css";
@@ -59,9 +59,18 @@ const projects = [
   },
 ];
 
+const orderOptions = [
+  "Ordem alfabética",
+  "Iniciados mais recentes",
+  "Prazo mais próximo",
+];
+
 export const ProjectList = () => {
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [projectList, setProjectList] = useState(projects);
+  const [openedFilter, setOpenedFilter] = useState(false);
+  const [orderBy, setOrderBy] = useState("Ordem alfabetica");
+  const [openedMenu, setOpenedMenu] = useState<number | null>(null);
 
   const handleToggleFavorites = () => {
     setOnlyFavorites(!onlyFavorites);
@@ -77,6 +86,19 @@ export const ProjectList = () => {
         p.id === project.id ? { ...p, isFavorited: !p.isFavorited } : p,
       ),
     );
+  };
+
+  const handleOrderBy = (option: number) => {
+    setOrderBy(orderOptions[option]);
+    setOpenedFilter(false);
+  };
+
+  const handleOpenMenu = (project: any) => {
+    setOpenedMenu((prev) => (prev === project.id ? null : project.id));
+  };
+
+  const handleCloseMenu = () => {
+    setOpenedMenu(null);
   };
 
   return (
@@ -97,17 +119,42 @@ export const ProjectList = () => {
             <span className="switch-slider" aria-hidden="true" />
             Apenas favoritos
           </label>
-
-          <select className="project-list-filter" aria-label="Filtrar projetos">
-            <option value="Ordem alfabetica">Ordem alfabética</option>
-            <option value="Iniciados mais recentes">
-              Iniciados mais recentes
-            </option>
-            <option value="Prazo mais proximo">Prazo mais próximo</option>
-          </select>
-
+          <div className="project-list-filter">
+            <div
+              className={
+                "project-list-filter-container" +
+                (openedFilter ? " opened" : "")
+              }
+            >
+              <button
+                className="project-list-filter-button"
+                onClick={() => setOpenedFilter(!openedFilter)}
+              >
+                {orderBy}
+                {openedFilter ? (
+                  <ChevronUp size={16} />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
+              </button>
+              {openedFilter && (
+                <ul className="project-list-options">
+                  {orderOptions.map((option, index) => (
+                    <li key={index} className="project-list-option">
+                      <button
+                        className="project-list-options-button"
+                        onClick={() => handleOrderBy(index)}
+                      >
+                        {option}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
           <button className="new-project-button">
-            <Plus size={20} />
+            <PlusCircle size={24} strokeWidth={2} />
             Novo Projeto
           </button>
         </div>
@@ -118,6 +165,8 @@ export const ProjectList = () => {
             key={project.id}
             project={project}
             onToggleFavorite={handleToggleFavorite}
+            onMenuOpen={handleOpenMenu}
+            onCloseMenu={handleCloseMenu}
           />
         ))}
       </div>

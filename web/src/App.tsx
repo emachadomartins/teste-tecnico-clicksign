@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="app">
       <Topbar />
-      <main className="page-content">
+      <main className="app-content">
         <ProjectList />
       </main>
     </div>
