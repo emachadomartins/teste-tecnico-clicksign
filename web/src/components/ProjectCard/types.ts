@@ -1,12 +1,4 @@
-export type Project = {
-  id: number;
-  name: string;
-  client: string;
-  startDate: string;
-  endDate: string;
-  coverUrl?: string;
-  isFavorited?: boolean;
-};
+import type { Project } from "../../types/project";
 
 export type ProjectCardProps = {
   project: Project;

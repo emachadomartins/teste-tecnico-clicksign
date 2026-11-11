@@ -2,6 +2,7 @@ package handler
 
 import (
 	"gerenciador-de-projetos-back/internal/model"
+	"gerenciador-de-projetos-back/internal/repository"
 	"gerenciador-de-projetos-back/internal/service"
 	"net/http"
 
@@ -14,7 +15,12 @@ type ProjectHandler struct {
 }
 
 func (h *ProjectHandler) GetMany(w http.ResponseWriter, r *http.Request) {
-	projects := h.service.List()
+	projects, err := h.service.List(r.Context())
+
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, err, h.logger)
+		return
+	}
 
 	respondList(w, projects, h.logger)
 }
@@ -26,7 +32,7 @@ func (h *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, err, h.logger)
 		return
 	}
-	project, err := h.service.Create(payload)
+	project, err := h.service.Create(r.Context(), payload)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err, h.logger)
 		return
@@ -42,7 +48,7 @@ func (h *ProjectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	project, err := h.service.Read(id)
+	project, err := h.service.Read(r.Context(), id)
 	if err != nil {
 		respondError(w, http.StatusNotFound, err, h.logger)
 		return
@@ -59,7 +65,7 @@ func (h *ProjectHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	payload, err := decodeBodyJson[model.ProjectPayload](r)
 
-	project, err := h.service.Update(id, payload)
+	project, err := h.service.Update(r.Context(), id, payload)
 	if err != nil {
 		respondError(w, http.StatusNotFound, err, h.logger)
 		return
@@ -75,7 +81,7 @@ func (h *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.Delete(id)
+	err = h.service.Delete(r.Context(), id)
 	if err != nil {
 		respondError(w, http.StatusNotFound, err, h.logger)
 		return
@@ -94,10 +100,10 @@ func (h *ProjectHandler) Routes() chi.Router {
 	return r
 }
 
-func NewProjectHandler() *ProjectHandler {
+func NewProjectHandler(r *repository.ProjectRepository) *ProjectHandler {
 	h := NewHandler("project")
 
-	s := service.NewProjectService(h.logger)
+	s := service.NewProjectService(h.logger, r)
 
 	return &ProjectHandler{
 		HandlerImpl: *h,

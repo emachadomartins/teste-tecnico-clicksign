@@ -44,7 +44,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             <Star
               size={32}
               color="#FFFFFF"
-              fill={project.isFavorited ? "#FFB23D" : "none"}
+              fill={project.isFavorite ? "#FFB23D" : "none"}
               strokeWidth={1}
             />
           </button>

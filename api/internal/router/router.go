@@ -2,13 +2,15 @@ package router
 
 import (
 	"gerenciador-de-projetos-back/internal/handler"
+	"gerenciador-de-projetos-back/internal/repository"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
+	"gorm.io/gorm"
 )
 
-func New(allowedOrigins []string) *chi.Mux {
+func New(db *gorm.DB, allowedOrigins []string) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
@@ -24,7 +26,8 @@ func New(allowedOrigins []string) *chi.Mux {
 		w.Write([]byte("Server is running"))
 	})
 
-	projectHandler := handler.NewProjectHandler()
+	projectRepo := repository.NewProjectRepository(db)
+	projectHandler := handler.NewProjectHandler(projectRepo)
 
 	r.Mount(projectHandler.Path, projectHandler.Routes())
 

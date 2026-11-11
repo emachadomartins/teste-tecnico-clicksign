@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Port           string
 	AllowedOrigins []string
+	DatabaseURL    string
 }
 
 func loadEnv(envKey string, required bool, defaultValue string, l *utils.LoggerImpl) (string, error) {
@@ -42,6 +43,10 @@ func Load() Config {
 
 	utils.ValidateError(err, false, l)
 
+	databaseUrl, err := loadEnv("DATABASE_URL", true, "", l)
+
+	utils.ValidateError(err, false, l)
+
 	if port[0] != ':' {
 		port = ":" + port
 	}
@@ -53,5 +58,6 @@ func Load() Config {
 	return Config{
 		Port:           port,
 		AllowedOrigins: strings.Split(allowedOrigins, ","),
+		DatabaseURL:    databaseUrl,
 	}
 }

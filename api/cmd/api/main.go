@@ -5,15 +5,21 @@ import (
 	"net/http"
 
 	"gerenciador-de-projetos-back/internal/config"
+	"gerenciador-de-projetos-back/internal/database"
 	"gerenciador-de-projetos-back/internal/router"
 	"gerenciador-de-projetos-back/internal/utils"
 )
 
 func main() {
 	config := config.Load()
-	r := router.New(config.AllowedOrigins)
+
+	db, err := database.Connect(config.DatabaseURL)
 
 	l := utils.NewLogger("api")
+	if err != nil {
+		log.Fatal(err)
+	}
+	r := router.New(db, config.AllowedOrigins)
 
 	l.Info("🔥 Starting server on port %s", config.Port)
 	if err := http.ListenAndServe(config.Port, r); err != nil {
