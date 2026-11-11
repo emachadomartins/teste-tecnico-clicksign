@@ -1,13 +1,14 @@
-import "./App.css";
+import { Outlet } from "react-router";
 import { Topbar } from "./components/Topbar";
-import { ProjectList } from "./pages/ProjectList";
+
+import "./App.css";
 
 function App() {
   return (
     <div className="app">
       <Topbar />
       <main className="app-content">
-        <ProjectList />
+        <Outlet />
       </main>
     </div>
   );

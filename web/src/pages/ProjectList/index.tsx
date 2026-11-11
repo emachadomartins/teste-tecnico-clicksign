@@ -166,7 +166,7 @@ export const ProjectList = () => {
             project={project}
             onToggleFavorite={handleToggleFavorite}
             onMenuOpen={handleOpenMenu}
-            onCloseMenu={handleCloseMenu}
+            onMenuClose={handleCloseMenu}
           />
         ))}
       </div>
