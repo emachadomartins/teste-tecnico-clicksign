@@ -1,0 +1,87 @@
+.project-form-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-form-headers {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px;
+  padding-top: 36px;
+  padding-bottom: 24px;
+  height: 40px;
+}
+
+.project-form {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.form-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+.file-input-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border: 2px dotted #717171;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #717171;
+  cursor: pointer;
+  text-align: center;
+}
+
+.file-input-text {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-input-button {
+  padding: 8px 16px;
+  border-radius: 24px;
+
+  color: #695ccd;
+  background: #ffffff;
+  border: 1px solid #695ccd;
+}
+
+.visually-hidden:focus-visible + .file-input-dropzone,
+.file-input:focus-within .file-input-dropzone {
+  outline: 2px solid #695ccd;
+  outline-offset: 2px;
+}
+
+.project-form-title {
+  font-style: normal;
+  font-size: 24px;
+  line-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #1f1283;
+}

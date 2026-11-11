@@ -1,5 +1,7 @@
 import { ChevronDown, ChevronUp, PlusCircle } from "lucide-react";
+
 import { useState } from "react";
+import { Link } from "react-router";
 import { ProjectCard } from "../../components/ProjectCard";
 import "./styles.css";
 
@@ -103,11 +105,11 @@ export const ProjectList = () => {
 
   return (
     <div className="project-list-container">
-      <div className="project-list-headers">
-        <div className="project-list-title">
-          <b>Projetos</b>
+      <div className="page-header">
+        <h1 className="page-title">
+          Projetos
           <span> ({visibleProjects.length})</span>
-        </div>
+        </h1>
         <div className="project-list-actions">
           <label className="switch">
             <input
@@ -153,10 +155,10 @@ export const ProjectList = () => {
               )}
             </div>
           </div>
-          <button className="new-project-button">
+          <Link className="new-project-button" to="/projects/new">
             <PlusCircle size={24} strokeWidth={2} />
             Novo Projeto
-          </button>
+          </Link>
         </div>
       </div>
       <div className="project-list">

@@ -1,12 +1,14 @@
-import { Outlet } from "react-router";
+import { Outlet, useMatch } from "react-router";
 import { Topbar } from "./components/Topbar";
 
 import "./App.css";
 
 function App() {
+  const isListPage = useMatch("/") !== null;
+
   return (
     <div className="app">
-      <Topbar />
+      <Topbar hasSearchButton={isListPage} />
       <main className="app-content">
         <Outlet />
       </main>

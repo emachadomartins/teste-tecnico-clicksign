@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 
+import { Link } from "react-router";
 import "./styles.css";
 import type { ProjectCardProps } from "./types";
 
@@ -68,10 +69,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           {isMenuOpen && (
             <ul className="card-menu-options">
               <li>
-                <button className="card-menu-option" onClick={() => {}}>
+                <Link
+                  to={`/projects/${project.id}/edit`}
+                  className="card-menu-option"
+                  onClick={() => {}}
+                >
                   <SquarePen size={24} aria-hidden="true" />
                   Editar
-                </button>
+                </Link>
               </li>
               <li>
                 <button className="card-menu-option" onClick={() => {}}>
