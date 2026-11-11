@@ -74,9 +74,6 @@ func (s *ProjectService) Update(ctx context.Context, id uuid.UUID, p model.Proje
 	if p.Client != nil {
 		project.Client = *p.Client
 	}
-	if p.IsFavorite != nil {
-		project.IsFavorite = *p.IsFavorite
-	}
 
 	if p.InitialDate != nil {
 		project.InitialDate = *p.InitialDate
@@ -104,4 +101,11 @@ func (s *ProjectService) Update(ctx context.Context, id uuid.UUID, p model.Proje
 
 func (s *ProjectService) Delete(ctx context.Context, id uuid.UUID) error {
 	return s.repository.Delete(ctx, id)
+}
+
+func (s *ProjectService) SetFavorite(ctx context.Context, id uuid.UUID, isFavorite bool) (*model.ProjectModel, error) {
+	if err := s.repository.SetFavorite(ctx, id, isFavorite); err != nil {
+		return nil, err
+	}
+	return s.repository.FindByID(ctx, id)
 }

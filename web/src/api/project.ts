@@ -53,4 +53,18 @@ export const projectsApi = {
     });
     return toProject(data);
   },
+
+  async delete(id: string) {
+    await request<void>(`/project/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async setFavorite(id: string, isFavorite: boolean) {
+    const { data } = await request<ApiProject>(`/project/${id}/favorite`, {
+      method: "PATCH",
+      body: JSON.stringify({ is_favorite: isFavorite }),
+    });
+    return toProject(data);
+  },
 };

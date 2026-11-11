@@ -35,6 +35,7 @@ export const ProjectList = () => {
     : projectList;
 
   const handleToggleFavorite = (project: Project) => {
+    projectsApi.setFavorite(project.id, !project.isFavorite);
     setProjectList((prev) =>
       prev.map((p) =>
         p.id === project.id ? { ...p, isFavorite: !p.isFavorite } : p,

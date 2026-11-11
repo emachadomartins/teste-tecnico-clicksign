@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"gerenciador-de-projetos-back/internal/model"
 	"gerenciador-de-projetos-back/internal/repository"
 	"gerenciador-de-projetos-back/internal/service"
@@ -90,12 +91,35 @@ func (h *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (h *ProjectHandler) SetFavorite(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDFromRequest(r)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err, h.logger)
+		return
+	}
+
+	payload, err := decodeBodyJson[model.FavoritePayload](r)
+	if err != nil || payload.IsFavorite == nil {
+		respondError(w, http.StatusBadRequest, errors.New("is_favorite is required"), h.logger)
+		return
+	}
+
+	project, err := h.service.SetFavorite(r.Context(), id, *payload.IsFavorite)
+	if err != nil {
+		respondError(w, http.StatusNotFound, err, h.logger)
+		return
+	}
+
+	respondSingle(w, http.StatusOK, project, h.logger)
+}
+
 func (h *ProjectHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", h.GetMany)
 	r.Post("/", h.Create)
 	r.Get("/{id}", h.GetByID)
 	r.Put("/{id}", h.Update)
+	r.Patch("/{id}/favorite", h.SetFavorite)
 	r.Delete("/{id}", h.Delete)
 	return r
 }

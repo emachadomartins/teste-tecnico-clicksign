@@ -5,7 +5,6 @@ import "fmt"
 type ProjectPayload struct {
 	Name        *string `json:"name"`
 	Client      *string `json:"client"`
-	IsFavorite  *bool   `json:"is_favorite"`
 	InitialDate *Date   `json:"initial_date"`
 	FinalDate   *Date   `json:"final_date"`
 }
@@ -17,6 +16,10 @@ type ProjectModel struct {
 	IsFavorite  bool   `json:"is_favorite"`
 	InitialDate Date   `json:"initial_date"`
 	FinalDate   Date   `json:"final_date"`
+}
+
+type FavoritePayload struct {
+	IsFavorite *bool `json:"is_favorite"`
 }
 
 func (p *ProjectModel) Validate() error {

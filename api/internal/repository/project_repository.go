@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"gerenciador-de-projetos-back/internal/model"
 
 	"github.com/google/uuid"
@@ -40,4 +41,19 @@ func (r *ProjectRepository) Update(ctx context.Context, p *model.ProjectModel) e
 }
 func (r *ProjectRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&model.ProjectModel{}, "id = ?", id).Error
+}
+
+func (r *ProjectRepository) SetFavorite(ctx context.Context, id uuid.UUID, isFavorite bool) error {
+	res := r.db.WithContext(ctx).
+		Model(&model.ProjectModel{}).
+		Where("id = ?", id).
+		Update("is_favorite", isFavorite)
+
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return fmt.Errorf("Project not found: %s", id)
+	}
+	return nil
 }
