@@ -16,8 +16,6 @@ import type { ProjectCardProps } from "./types";
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   onToggleFavorite,
-  onMenuOpen,
-  onMenuClose,
 }: ProjectCardProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -53,10 +51,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             aria-label="Mais opções"
             onClick={() => {
               setIsMenuOpen(!isMenuOpen);
-              if (isMenuOpen) {
-                onMenuClose();
-              }
-              onMenuOpen(project);
             }}
           >
             <CircleEllipsis
@@ -72,7 +66,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 <Link
                   to={`/projects/${project.id}/edit`}
                   className="card-menu-option"
-                  onClick={() => {}}
                 >
                   <SquarePen size={24} aria-hidden="true" />
                   Editar

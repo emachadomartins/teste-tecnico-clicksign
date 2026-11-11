@@ -5,6 +5,8 @@ import (
 	"gerenciador-de-projetos-back/internal/model"
 	"gerenciador-de-projetos-back/internal/repository"
 	"gerenciador-de-projetos-back/internal/service"
+	"gerenciador-de-projetos-back/internal/storage"
+	"io"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -113,6 +115,56 @@ func (h *ProjectHandler) SetFavorite(w http.ResponseWriter, r *http.Request) {
 	respondSingle(w, http.StatusOK, project, h.logger)
 }
 
+func (h *ProjectHandler) UploadCover(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDFromRequest(r)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err, h.logger)
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, 5<<20)
+
+	file, _, err := r.FormFile("cover")
+
+	if err != nil {
+		respondError(w, http.StatusBadRequest, errors.New("cover file is required"), h.logger)
+		return
+	}
+	defer file.Close()
+
+	project, err := h.service.UploadCoverImage(r.Context(), id, file)
+	if err != nil {
+		respondError(w, http.StatusNotFound, err, h.logger)
+
+		return
+	}
+
+	respondSingle(w, http.StatusOK, project, h.logger)
+}
+
+func (h *ProjectHandler) GetCover(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDFromRequest(r)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err, h.logger)
+		return
+	}
+
+	reader, contentType, err := h.service.GetCoverImage(r.Context(), id)
+	if err != nil {
+		respondError(w, http.StatusNotFound, err, h.logger)
+		return
+	}
+
+	defer reader.Close()
+
+	w.Header().Set("Content-Type", contentType)
+	w.WriteHeader(http.StatusOK)
+	if _, err := io.Copy(w, reader); err != nil {
+		respondError(w, http.StatusInternalServerError, err, h.logger)
+	}
+
+}
+
 func (h *ProjectHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", h.GetMany)
@@ -121,13 +173,16 @@ func (h *ProjectHandler) Routes() chi.Router {
 	r.Put("/{id}", h.Update)
 	r.Patch("/{id}/favorite", h.SetFavorite)
 	r.Delete("/{id}", h.Delete)
+	r.Post("/{id}/cover", h.UploadCover)
+	r.Get("/{id}/cover", h.GetCover)
 	return r
 }
 
-func NewProjectHandler(r *repository.ProjectRepository) *ProjectHandler {
+func NewProjectHandler(
+	repository *repository.ProjectRepository, storage *storage.LocalStorage) *ProjectHandler {
 	h := NewHandler("project")
 
-	s := service.NewProjectService(h.logger, r)
+	s := service.NewProjectService(h.logger, repository, storage)
 
 	return &ProjectHandler{
 		HandlerImpl: *h,

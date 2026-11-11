@@ -10,9 +10,10 @@ import (
 )
 
 type Config struct {
-	Port           string
-	AllowedOrigins []string
-	DatabaseURL    string
+	Port            string
+	AllowedOrigins  []string
+	DatabaseURL     string
+	UploadsBasePath string
 }
 
 func loadEnv(envKey string, required bool, defaultValue string, l *utils.LoggerImpl) (string, error) {
@@ -43,21 +44,26 @@ func Load() Config {
 
 	utils.ValidateError(err, false, l)
 
+	if port[0] != ':' {
+		port = ":" + port
+	}
+
 	databaseUrl, err := loadEnv("DATABASE_URL", true, "", l)
 
 	utils.ValidateError(err, false, l)
 
-	if port[0] != ':' {
-		port = ":" + port
-	}
+	uploadsBasePath, err := loadEnv("UPLOADS_BASE_PATH", false, "uploads", l)
+
+	utils.ValidateError(err, false, l)
 
 	allowedOrigins, err := loadEnv("ALLOWED_ORIGINS", false, "http://localhost:5000,http://127.0.0.1:5000", l)
 
 	utils.ValidateError(err, false, l)
 
 	return Config{
-		Port:           port,
-		AllowedOrigins: strings.Split(allowedOrigins, ","),
-		DatabaseURL:    databaseUrl,
+		Port:            port,
+		AllowedOrigins:  strings.Split(allowedOrigins, ","),
+		DatabaseURL:     databaseUrl,
+		UploadsBasePath: uploadsBasePath,
 	}
 }

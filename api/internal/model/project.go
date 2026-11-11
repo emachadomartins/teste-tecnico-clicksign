@@ -11,11 +11,12 @@ type ProjectPayload struct {
 
 type ProjectModel struct {
 	BaseModel
-	Name        string `json:"name"`
-	Client      string `json:"client"`
-	IsFavorite  bool   `json:"is_favorite"`
-	InitialDate Date   `json:"initial_date"`
-	FinalDate   Date   `json:"final_date"`
+	Name        string  `json:"name"`
+	Client      string  `json:"client"`
+	IsFavorite  bool    `json:"is_favorite"`
+	InitialDate Date    `json:"initial_date"`
+	FinalDate   Date    `json:"final_date"`
+	CoverURL    *string `json:"cover_url,omitempty"`
 }
 
 type FavoritePayload struct {

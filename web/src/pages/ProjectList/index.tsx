@@ -18,7 +18,6 @@ export const ProjectList = () => {
   const [projectList, setProjectList] = useState<Project[]>([]);
   const [openedFilter, setOpenedFilter] = useState(false);
   const [orderBy, setOrderBy] = useState("Ordem alfabetica");
-  const [openedMenu, setOpenedMenu] = useState<number | null>(null);
 
   useEffect(() => {
     projectsApi.list().then(({ projects }) => {
@@ -46,14 +45,6 @@ export const ProjectList = () => {
   const handleOrderBy = (option: number) => {
     setOrderBy(orderOptions[option]);
     setOpenedFilter(false);
-  };
-
-  const handleOpenMenu = (project: any) => {
-    setOpenedMenu((prev) => (prev === project.id ? null : project.id));
-  };
-
-  const handleCloseMenu = () => {
-    setOpenedMenu(null);
   };
 
   return (
@@ -120,8 +111,6 @@ export const ProjectList = () => {
             key={project.id}
             project={project}
             onToggleFavorite={handleToggleFavorite}
-            onMenuOpen={handleOpenMenu}
-            onMenuClose={handleCloseMenu}
           />
         ))}
       </div>
