@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"gerenciador-de-projetos-back/internal/utils"
@@ -59,19 +60,22 @@ func (s *LocalStorage) Save(ctx context.Context, name string, content io.Reader)
 		return "", fmt.Errorf("invalid content type: %s", contentType)
 	}
 
-	f, err := os.Create(filepath.Join(s.basePath, name+utils.DetectFileExtension(contentType)))
+	fileName := name + utils.DetectFileExtension(contentType)
+
+	f, err := os.Create(filepath.Join(s.basePath, fileName))
 
 	if err != nil {
 		return "", err
 	}
 	defer f.Close()
 
-	_, err = io.Copy(f, content)
+	_, err = io.Copy(f, io.MultiReader(bytes.NewReader(head), content))
+
 	if err != nil {
 		return "", err
 	}
 
-	return name, nil
+	return fileName, nil
 }
 
 func (s *LocalStorage) Read(ctx context.Context, path string) (io.ReadCloser, string, error) {
@@ -79,7 +83,6 @@ func (s *LocalStorage) Read(ctx context.Context, path string) (io.ReadCloser, st
 	if err != nil {
 		return nil, "", err
 	}
-	defer f.Close()
 
 	contentType := mime.TypeByExtension(filepath.Ext(path))
 

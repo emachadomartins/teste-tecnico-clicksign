@@ -1,5 +1,5 @@
-import { ArrowLeft, Upload } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, Trash, Upload } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ApiError } from "../../api/client";
 import { projectsApi, type ProjectInput } from "../../api/project";
@@ -51,6 +51,13 @@ export const ProjectForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverError, setCoverError] = useState<string | null>(null);
+  const [removeCover, setRemoveCover] = useState(false);
+
+  const fileInputId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -66,11 +73,23 @@ export const ProjectForm = () => {
     setSubmitError(null);
 
     try {
-      if (id) {
-        await projectsApi.update(id, form);
-      } else {
-        await projectsApi.create(form);
+      const req = id
+        ? () => projectsApi.update(id, form)
+        : () => projectsApi.create(form);
+      const saved = await req();
+
+      if (coverFile) {
+        try {
+          await projectsApi.uploadCover(saved.id, coverFile);
+        } catch {
+          setSubmitError(
+            "O projeto foi salvo, mas não foi possível enviar a capa. Tente novamente.",
+          );
+          if (!id) navigate(`/projects/${saved.id}/edit`, { replace: true });
+          return;
+        }
       }
+
       navigate("/");
     } catch (err) {
       setSubmitError(
@@ -91,6 +110,7 @@ export const ProjectForm = () => {
         setForm({
           name: project.name,
           client: project.client,
+          cover_url: project.coverUrl,
           initial_date: project.initialDate,
           final_date: project.finalDate,
         });
@@ -114,6 +134,46 @@ export const ProjectForm = () => {
   const handleChange = (field: keyof ProjectInput, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      setCoverError("Escolha uma imagem .jpg ou .png");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setCoverError("A imagem deve ter no máximo 5 MB");
+      return;
+    }
+
+    setCoverError(null);
+    setCoverFile(file);
+  };
+
+  const previewUrl = useMemo(
+    () => (coverFile ? URL.createObjectURL(coverFile) : null),
+    [coverFile],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const handleRemoveCover = () => {
+    if (coverFile) {
+      setCoverFile(null);
+    } else {
+      setForm((prev) => ({ ...prev, cover_url: undefined }));
+      setRemoveCover(true);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const coverToShow = previewUrl ?? form?.cover_url ?? null;
 
   return (
     <div className="project-form-container">
@@ -167,22 +227,42 @@ export const ProjectForm = () => {
             required
           />
         </div>
-        <FormInput label="Capa do Projeto">
-          <div className="file-input">
+        <FormInput label="Capa do Projeto" error={coverError ?? undefined}>
+          <div className="file-input cover-field">
             <label htmlFor={id} className="file-input-dropzone">
               <Upload size={24} aria-hidden="true" color="#717171" />
               <span className="file-input-text">
-                Escolha uma imagem .jpg ou .png no seu dispositivo
+                {coverFile?.name ??
+                  "Escolha uma imagem .jpg ou .png no seu dispositivo"}
               </span>
               <span className="file-input-button">Selecionar</span>
             </label>
+            {coverToShow && (
+              <>
+                <img
+                  className="cover-field-image"
+                  src={coverToShow}
+                  alt="Capa do projeto"
+                />
+                <div className="cover-field-actions">
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label="Remover capa"
+                    onClick={handleRemoveCover}
+                  >
+                    <Trash size={20} />
+                  </button>
+                </div>
+              </>
+            )}
 
             <input
               id={id}
               type="file"
               accept="image/png, image/jpeg"
               className="visually-hidden"
-              onChange={(e) => {}}
+              onChange={handleCoverChange}
             />
           </div>
         </FormInput>

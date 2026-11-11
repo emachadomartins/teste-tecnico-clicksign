@@ -1,5 +1,5 @@
 import type { Project } from "../types/project";
-import { request } from "./client";
+import { BASE_URL, request } from "./client";
 
 type ApiProject = {
   id: string;
@@ -8,6 +8,7 @@ type ApiProject = {
   is_favorite: boolean;
   initial_date: string;
   final_date: string;
+  cover_url?: string;
 };
 
 const toProject = (p: ApiProject): Project => ({
@@ -17,6 +18,9 @@ const toProject = (p: ApiProject): Project => ({
   isFavorite: p.is_favorite,
   initialDate: p.initial_date,
   finalDate: p.final_date,
+  coverUrl: p.cover_url
+    ? `${BASE_URL}/project/${p.id}/cover?v=${encodeURIComponent(p.cover_url)}`
+    : undefined,
 });
 
 export type ProjectInput = {
@@ -24,6 +28,7 @@ export type ProjectInput = {
   client: string;
   initial_date: string;
   final_date: string;
+  cover_url?: string;
 };
 
 export const projectsApi = {
@@ -64,6 +69,23 @@ export const projectsApi = {
     const { data } = await request<ApiProject>(`/project/${id}/favorite`, {
       method: "PATCH",
       body: JSON.stringify({ is_favorite: isFavorite }),
+    });
+    return toProject(data);
+  },
+
+  async uploadCover(id: string, file: File) {
+    const body = new FormData();
+    body.append("cover", file);
+    const { data } = await request<ApiProject>(`/project/${id}/cover`, {
+      method: "POST",
+      body,
+    });
+    return toProject(data);
+  },
+
+  async removeCover(id: string) {
+    const { data } = await request<ApiProject>(`/project/${id}/cover`, {
+      method: "DELETE",
     });
     return toProject(data);
   },

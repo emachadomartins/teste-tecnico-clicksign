@@ -160,9 +160,25 @@ func (h *ProjectHandler) GetCover(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentType)
 	w.WriteHeader(http.StatusOK)
 	if _, err := io.Copy(w, reader); err != nil {
-		respondError(w, http.StatusInternalServerError, err, h.logger)
+		h.logger.Error("error writing cover image: %s", err)
 	}
 
+}
+
+func (h *ProjectHandler) DeleteCover(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDFromRequest(r)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err, h.logger)
+		return
+	}
+
+	err = h.service.DeleteCoverImage(r.Context(), id)
+	if err != nil {
+		respondError(w, http.StatusNotFound, err, h.logger)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *ProjectHandler) Routes() chi.Router {

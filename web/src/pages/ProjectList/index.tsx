@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, PlusCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { projectsApi } from "../../api/project";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ProjectCard } from "../../components/ProjectCard";
 import type { Project } from "../../types/project";
 import "./styles.css";
@@ -18,6 +19,8 @@ export const ProjectList = () => {
   const [projectList, setProjectList] = useState<Project[]>([]);
   const [openedFilter, setOpenedFilter] = useState(false);
   const [orderBy, setOrderBy] = useState("Ordem alfabetica");
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     projectsApi.list().then(({ projects }) => {
@@ -45,6 +48,20 @@ export const ProjectList = () => {
   const handleOrderBy = (option: number) => {
     setOrderBy(orderOptions[option]);
     setOpenedFilter(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!projectToDelete) return;
+    setIsDeleting(true);
+    try {
+      await projectsApi.delete(projectToDelete.id);
+      setProjectList((prev) => prev.filter((p) => p.id !== projectToDelete.id));
+      setProjectToDelete(null);
+    } catch {
+      // mostrar um erro (dentro do modal, por exemplo)
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -110,10 +127,24 @@ export const ProjectList = () => {
           <ProjectCard
             key={project.id}
             project={project}
-            onToggleFavorite={handleToggleFavorite}
+            onFavorite={handleToggleFavorite}
+            onDelete={setProjectToDelete}
           />
         ))}
       </div>
+      <ConfirmDialog
+        open={projectToDelete !== null}
+        title="Remover projeto"
+        message={
+          <>
+            Tem certeza que deseja remover <b>{projectToDelete?.name}</b>?
+          </>
+        }
+        confirmLabel="Remover"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setProjectToDelete(null)}
+      />
     </div>
   );
 };

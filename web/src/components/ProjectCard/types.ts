@@ -2,5 +2,6 @@ import type { Project } from "../../types/project";
 
 export type ProjectCardProps = {
   project: Project;
-  onToggleFavorite: (project: Project) => void;
+  onFavorite: (project: Project) => void;
+  onDelete: (project: Project) => void;
 };

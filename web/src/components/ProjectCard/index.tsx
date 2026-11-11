@@ -15,7 +15,8 @@ import type { ProjectCardProps } from "./types";
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
-  onToggleFavorite,
+  onDelete,
+  onFavorite,
 }: ProjectCardProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -37,7 +38,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           <button
             aria-label="Favoritar"
             className="favorite-button"
-            onClick={() => onToggleFavorite(project)}
+            onClick={() => onFavorite(project)}
           >
             <Star
               size={32}
@@ -72,7 +73,13 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 </Link>
               </li>
               <li>
-                <button className="card-menu-option" onClick={() => {}}>
+                <button
+                  className="card-menu-option"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onDelete(project);
+                  }}
+                >
                   <Trash size={24} aria-hidden="true" />
                   Remover
                 </button>

@@ -3,6 +3,9 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-bottom: 32px;
 }
 
 .project-form-headers {
@@ -52,6 +55,9 @@
   color: #717171;
   cursor: pointer;
   text-align: center;
+  min-height: 420px;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .file-input-text {
@@ -117,4 +123,48 @@
   color: #c40000;
   text-align: center;
   margin-top: 8px;
+}
+
+.cover-field {
+  position: relative;
+}
+
+.file-input-dropzone--hidden {
+  visibility: hidden;
+}
+
+.cover-field-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.cover-field .file-input-dropzone {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.cover-field-actions {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #695ccd;
+  cursor: pointer;
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.25);
 }
