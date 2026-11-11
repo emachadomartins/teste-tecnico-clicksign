@@ -1,9 +1,10 @@
-import { ChevronDown, ChevronUp, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
 import { projectsApi } from "../../api/project";
+import { Button } from "../../components/Button";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { Icon } from "../../components/Icon";
 import { ProjectCard } from "../../components/ProjectCard";
 import type { Project } from "../../types/project";
 import "./styles.css";
@@ -94,11 +95,13 @@ export const ProjectList = () => {
                 onClick={() => setOpenedFilter(!openedFilter)}
               >
                 {orderBy}
-                {openedFilter ? (
-                  <ChevronUp size={16} />
-                ) : (
-                  <ChevronDown size={16} />
-                )}
+                {
+                  <Icon
+                    icon={openedFilter ? "chevron-up" : "chevron-down"}
+                    color="#695CCD"
+                    size={20}
+                  />
+                }
               </button>
               {openedFilter && (
                 <ul className="project-list-options">
@@ -116,10 +119,13 @@ export const ProjectList = () => {
               )}
             </div>
           </div>
-          <Link className="new-project-button" to="/projects/new">
-            <PlusCircle size={24} strokeWidth={2} />
+          <Button
+            isLink
+            to="/projects/new"
+            icon={<PlusCircle size={24} strokeWidth={2} />}
+          >
             Novo Projeto
-          </Link>
+          </Button>
         </div>
       </div>
       <div className="project-list">
@@ -136,10 +142,12 @@ export const ProjectList = () => {
         open={projectToDelete !== null}
         title="Remover projeto"
         message={
-          <>
-            Tem certeza que deseja remover <b>{projectToDelete?.name}</b>?
-          </>
+          <span className="remove-project-message">
+            Essa ação removerá definitivamente o projeto:
+            <b className="remove-project-name">{projectToDelete?.name}</b>
+          </span>
         }
+        icon="trash"
         confirmLabel="Remover"
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}

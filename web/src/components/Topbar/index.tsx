@@ -1,10 +1,13 @@
-import { History, Search, X } from "lucide-react";
 import logo from "../../assets/logo.svg";
 import { useSearchHistory } from "../../hooks/useSearchHistory";
-import type { TopbarProps } from "./types";
 
 import React, { useState } from "react";
+import { Icon } from "../Icon";
 import "./styles.css";
+
+export type TopbarProps = {
+  hasSearchButton?: boolean;
+};
 
 export const Topbar: React.FC<TopbarProps> = ({
   hasSearchButton = true,
@@ -21,18 +24,19 @@ export const Topbar: React.FC<TopbarProps> = ({
     <div className="top-bar">
       <img src={logo} alt="Logo Gerenciador de Projetos" className="logo" />
       {hasSearchButton && (
-        <button
+        <Icon
           className="search-btn"
           onClick={handleSearchClick}
-          aria-label="Pesquisar"
-        >
-          <Search className="search-icon" color="#FFFFFF" size={32} />
-        </button>
+          label="Pesquisar"
+          icon="search"
+          color="#FFFFFF"
+          size={32}
+        />
       )}
       {isSearchActive && (
         <div className="search-box">
           <div className="search-field">
-            <Search size={24} aria-hidden="true" />
+            <Icon icon="search" color="#695ccd" size={24} aria-hidden="true" />
             <input
               className="search-input"
               type="text"
@@ -47,13 +51,13 @@ export const Topbar: React.FC<TopbarProps> = ({
               }}
               autoFocus
             />
-            <button
-              className="search-btn"
-              aria-label="Fechar busca"
+            <Icon
+              icon="x"
+              color="#695ccd"
+              size={24}
+              label="Fechar busca"
               onClick={handleSearchClick}
-            >
-              <X size={24} />
-            </button>
+            />
           </div>
           {history.length > 0 && (
             <ul className="search-history">
@@ -66,7 +70,12 @@ export const Topbar: React.FC<TopbarProps> = ({
                     }}
                     className="search-history-button"
                   >
-                    <History size={24} aria-hidden="true" />
+                    <Icon
+                      icon="history"
+                      size={24}
+                      aria-hidden="true"
+                      color="#717171"
+                    />
                     {term}
                   </button>
                 </li>

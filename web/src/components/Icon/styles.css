@@ -1,0 +1,29 @@
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.icon-shadow {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 1));
+}
+
+.icon-circle {
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+}
+
+button.icon {
+  cursor: pointer;
+}
+
+button.icon:focus-visible {
+  outline: 2px solid #695ccd;
+  outline-offset: 2px;
+}

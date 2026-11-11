@@ -1,10 +1,13 @@
-import { useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
+import { Button } from "../Button";
+import { Icon, type IconName } from "../Icon";
 import "./styles.css";
 
 type ConfirmDialogProps = {
   open: boolean;
   title: string;
-  message: React.ReactNode;
+  message: ReactNode;
+  icon?: IconName;
   confirmLabel?: string;
   isLoading?: boolean;
   onConfirm: () => void;
@@ -15,7 +18,7 @@ export const ConfirmDialog = ({
   open,
   title,
   message,
-  confirmLabel = "Confirmar",
+  icon,
   isLoading = false,
   onConfirm,
   onCancel,
@@ -36,27 +39,47 @@ export const ConfirmDialog = ({
       className="confirm-dialog"
       aria-labelledby="confirm-dialog-title"
       onCancel={(e) => {
-        e.preventDefault(); // o Esc não fecha sozinho; quem fecha é o estado
+        e.preventDefault();
         onCancel();
       }}
     >
+      {icon && (
+        <div className="confirm-dialog-icon">
+          {
+            <Icon
+              color="#FFFFFF"
+              size={20}
+              circleColor="#695CCD"
+              circleSize={64}
+              circle
+              icon={icon}
+              shadow
+            />
+          }
+        </div>
+      )}
       <h2 id="confirm-dialog-title" className="confirm-dialog-title">
         {title}
       </h2>
       <p className="confirm-dialog-message">{message}</p>
 
       <div className="confirm-dialog-actions">
-        <button type="button" onClick={onCancel} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
           Cancelar
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           className="confirm-dialog-confirm"
           onClick={onConfirm}
           disabled={isLoading}
         >
-          {isLoading ? "Removendo..." : confirmLabel}
-        </button>
+          Confirmar
+        </Button>
       </div>
     </dialog>
   );

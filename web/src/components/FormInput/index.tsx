@@ -1,6 +1,17 @@
-import { useId, type FC } from "react";
+import {
+  useId,
+  type FC,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from "react";
 import "./styles.css";
-import type { FormInputProps } from "./types";
+
+type FormInputProps = InputHTMLAttributes<HTMLInputElement> & {
+  label: string;
+  children?: ReactNode;
+  required?: boolean;
+  error?: string;
+};
 
 export const FormInput: FC<FormInputProps> = ({
   label,

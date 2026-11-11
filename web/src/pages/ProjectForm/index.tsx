@@ -1,9 +1,10 @@
-import { ArrowLeft, Trash, Upload } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ApiError } from "../../api/client";
 import { projectsApi, type ProjectInput } from "../../api/project";
+import { Button } from "../../components/Button";
 import { FormInput } from "../../components/FormInput";
+import { Icon } from "../../components/Icon";
 import "./styles.css";
 
 const EMPTY_FORM: ProjectInput = {
@@ -55,8 +56,9 @@ export const ProjectForm = () => {
   const [coverError, setCoverError] = useState<string | null>(null);
   const [removeCover, setRemoveCover] = useState(false);
 
-  const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fileInputId = useId();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,6 +79,17 @@ export const ProjectForm = () => {
         ? () => projectsApi.update(id, form)
         : () => projectsApi.create(form);
       const saved = await req();
+
+      if (removeCover && !coverFile) {
+        try {
+          await projectsApi.removeCover(saved.id);
+        } catch {
+          setSubmitError(
+            "O projeto foi salvo, mas não foi possível remover a capa. Tente novamente.",
+          );
+          return;
+        }
+      }
 
       if (coverFile) {
         try {
@@ -164,9 +177,8 @@ export const ProjectForm = () => {
   }, [previewUrl]);
 
   const handleRemoveCover = () => {
-    if (coverFile) {
-      setCoverFile(null);
-    } else {
+    if (coverFile) setCoverFile(null);
+    else {
       setForm((prev) => ({ ...prev, cover_url: undefined }));
       setRemoveCover(true);
     }
@@ -178,7 +190,7 @@ export const ProjectForm = () => {
   return (
     <div className="project-form-container">
       <Link className="page-back-link" to="/">
-        <ArrowLeft size={16} />
+        <Icon icon="arrow-left" color="#695ccd" size={16} />
         Voltar
       </Link>
       <div className="project-form-headers">
@@ -229,13 +241,23 @@ export const ProjectForm = () => {
         </div>
         <FormInput label="Capa do Projeto" error={coverError ?? undefined}>
           <div className="file-input cover-field">
-            <label htmlFor={id} className="file-input-dropzone">
-              <Upload size={24} aria-hidden="true" color="#717171" />
+            <label htmlFor={fileInputId} className="file-input-dropzone">
+              <Icon
+                icon="upload"
+                size={24}
+                aria-hidden="true"
+                color="#717171"
+              />
               <span className="file-input-text">
-                {coverFile?.name ??
-                  "Escolha uma imagem .jpg ou .png no seu dispositivo"}
+                Escolha uma imagem .jpg ou .png no seu dispositivo
               </span>
-              <span className="file-input-button">Selecionar</span>
+              <Button
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+                isFake
+              >
+                Selecionar
+              </Button>
             </label>
             {coverToShow && (
               <>
@@ -245,24 +267,26 @@ export const ProjectForm = () => {
                   alt="Capa do projeto"
                 />
                 <div className="cover-field-actions">
-                  <button
-                    type="button"
+                  <Icon
+                    icon="trash"
+                    color="#695ccd"
                     className="icon-button"
-                    aria-label="Remover capa"
+                    label="Remover capa"
                     onClick={handleRemoveCover}
-                  >
-                    <Trash size={20} />
-                  </button>
+                    size={20}
+                  />
                 </div>
               </>
             )}
 
             <input
-              id={id}
+              id={fileInputId}
+              ref={fileInputRef}
               type="file"
               accept="image/png, image/jpeg"
               className="visually-hidden"
               onChange={handleCoverChange}
+              tabIndex={-1}
             />
           </div>
         </FormInput>
@@ -271,7 +295,7 @@ export const ProjectForm = () => {
             {submitError}
           </p>
         )}
-        <button
+        <Button
           className="project-form-submit"
           disabled={!isFormValid || isSubmitting}
           type="submit"
@@ -281,7 +305,7 @@ export const ProjectForm = () => {
             : isEditMode
               ? "Salvar Projeto"
               : "Criar Projeto"}
-        </button>
+        </Button>
       </form>
     </div>
   );

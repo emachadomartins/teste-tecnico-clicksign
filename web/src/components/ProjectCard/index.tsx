@@ -1,17 +1,14 @@
-import {
-  CalendarCheck,
-  CalendarPlus,
-  CircleEllipsis,
-  Layers,
-  SquarePen,
-  Star,
-  Trash,
-} from "lucide-react";
 import React, { useState } from "react";
-
 import { Link } from "react-router";
+import type { Project } from "../../types/project";
+import { Icon } from "../Icon";
 import "./styles.css";
-import type { ProjectCardProps } from "./types";
+
+export type ProjectCardProps = {
+  project: Project;
+  onFavorite: (project: Project) => void;
+  onDelete: (project: Project) => void;
+};
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
@@ -31,36 +28,35 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           />
         ) : (
           <div className="project-image-placeholder" aria-hidden="true">
-            <Layers size={80} />
+            <Icon icon="layers" color="#FFFFFF" size={80} shadow />
           </div>
         )}
         <div className="project-actions">
-          <button
-            aria-label="Favoritar"
-            className="favorite-button"
+          <Icon
+            label="Favoritar"
             onClick={() => onFavorite(project)}
-          >
-            <Star
-              size={32}
-              color="#FFFFFF"
-              fill={project.isFavorite ? "#FFB23D" : "none"}
-              strokeWidth={1}
-            />
-          </button>
-          <button
-            className="ellipsis-button"
-            aria-label="Mais opções"
+            icon="star"
+            size={32}
+            color="#FFFFFF"
+            fill={project.isFavorite ? "#FFB23D" : "none"}
+            stroke={1}
+            shadow
+          />
+
+          <Icon
+            label="Mais opções"
             onClick={() => {
               setIsMenuOpen(!isMenuOpen);
             }}
-          >
-            <CircleEllipsis
-              size={32}
-              color="#695CCD"
-              fill="#FFFFFF"
-              strokeWidth={2}
-            />
-          </button>
+            icon="ellipsis"
+            size={24}
+            color="#695CCD"
+            circle
+            circleColor="#FFFFFF"
+            circleSize={32}
+            shadow
+          />
+
           {isMenuOpen && (
             <ul className="card-menu-options">
               <li>
@@ -68,7 +64,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                   to={`/projects/${project.id}/edit`}
                   className="card-menu-option"
                 >
-                  <SquarePen size={24} aria-hidden="true" />
+                  <Icon
+                    icon="square-pen"
+                    color="#695ccd"
+                    size={24}
+                    aria-hidden="true"
+                  />
                   Editar
                 </Link>
               </li>
@@ -80,7 +81,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                     onDelete(project);
                   }}
                 >
-                  <Trash size={24} aria-hidden="true" />
+                  <Icon
+                    icon="trash"
+                    color="#695ccd"
+                    size={24}
+                    aria-hidden="true"
+                  />
                   Remover
                 </button>
               </li>
@@ -95,11 +101,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         </p>
         <div className="project-dates">
           <div className="date">
-            <CalendarPlus size={24} color="#717171" />
+            <Icon icon="calendar-plus" size={24} color="#717171" />
             <span>{project.initialDate}</span>
           </div>
           <div className="date">
-            <CalendarCheck size={24} color="#717171" />
+            <Icon icon="calendar-check" size={24} color="#717171" />
             <span>{project.finalDate}</span>
           </div>
         </div>

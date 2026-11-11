@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 32px;
-  padding-top: 36px;
+  padding-top: 0px;
   padding-bottom: 24px;
   height: 40px;
 }
@@ -94,29 +94,9 @@
 }
 
 .project-form-submit {
-  background: #695ccd;
-  border: 1px solid #695ccd;
-
-  color: #ffffff;
-
-  border-radius: 26px;
   width: 100%;
-  text-align: center;
-  justify-content: center;
-  padding: 15px;
 
   margin-top: 24px;
-
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 20px;
-  cursor: pointer;
-}
-
-.project-form-submit:disabled {
-  background: #b2a8ff;
-  cursor: not-allowed;
 }
 
 .form-submit-error {
@@ -167,4 +147,13 @@
   color: #695ccd;
   cursor: pointer;
   box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.25);
+}
+
+.page-back-link {
+  gap: 4px;
+  font-size: 16px;
+  color: #695ccd;
+  padding-top: 25px;
+  padding-left: 35px;
+  text-decoration: none;
 }
