@@ -1,9 +1,10 @@
-type FormInputProps = {
+import type { InputHTMLAttributes, ReactNode } from "react";
+
+type FormInputProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
-  type?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   required?: boolean;
-  value?: string;
+  error?: string;
 };
 
 export type { FormInputProps };

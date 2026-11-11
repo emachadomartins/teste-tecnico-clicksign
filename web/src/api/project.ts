@@ -15,9 +15,16 @@ const toProject = (p: ApiProject): Project => ({
   name: p.name,
   client: p.client,
   isFavorite: p.is_favorite,
-  startDate: p.initial_date,
-  endDate: p.final_date,
+  initialDate: p.initial_date,
+  finalDate: p.final_date,
 });
+
+export type ProjectInput = {
+  name: string;
+  client: string;
+  initial_date: string;
+  final_date: string;
+};
 
 export const projectsApi = {
   async list() {
@@ -29,6 +36,21 @@ export const projectsApi = {
   },
   async get(id: string) {
     const { data } = await request<ApiProject>(`/project/${id}`);
+    return toProject(data);
+  },
+  async create(input: ProjectInput) {
+    const { data } = await request<ApiProject>("/project", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return toProject(data);
+  },
+
+  async update(id: string, input: ProjectInput) {
+    const { data } = await request<ApiProject>(`/project/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
     return toProject(data);
   },
 };

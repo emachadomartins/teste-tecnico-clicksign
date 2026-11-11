@@ -39,3 +39,14 @@
   border: 1px solid #717171;
   border-radius: 8px;
 }
+
+.form-input-label-error,
+.form-input-label-error span,
+.form-input-error-message,
+.form-input-error {
+  color: #c40000;
+}
+
+.form-input-error {
+  border: 2px solid #c40000;
+}

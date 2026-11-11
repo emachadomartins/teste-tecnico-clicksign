@@ -17,6 +17,7 @@
 }
 
 .project-form {
+  width: 100%;
   max-width: 700px;
   margin: 0 auto;
 }
@@ -84,4 +85,36 @@
   gap: 8px;
 
   color: #1f1283;
+}
+
+.project-form-submit {
+  background: #695ccd;
+  border: 1px solid #695ccd;
+
+  color: #ffffff;
+
+  border-radius: 26px;
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  padding: 15px;
+
+  margin-top: 24px;
+
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.project-form-submit:disabled {
+  background: #b2a8ff;
+  cursor: not-allowed;
+}
+
+.form-submit-error {
+  color: #c40000;
+  text-align: center;
+  margin-top: 8px;
 }

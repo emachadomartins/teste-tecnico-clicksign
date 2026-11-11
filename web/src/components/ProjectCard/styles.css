@@ -3,17 +3,30 @@
   background: #ffffff;
   border-radius: 16px;
   height: 430px;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-card {
-  text-align: left;
+  flex: 1; /* o corpo ocupa toda a altura que sobra */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* espaço mínimo entre título, cliente e datas */
   padding: 24px;
+  text-align: left;
 }
 
 .project-cover {
   position: relative;
   height: 230px;
+  flex-shrink: 0;
   border-radius: 16px 16px 0 0;
+}
+
+.project-name,
+.project-description {
+  margin: 0; /* tira as margens padrão do <p>; quem controla é o gap */
 }
 
 .project-image {
@@ -86,6 +99,7 @@
 }
 
 .project-dates {
+  margin-top: auto; /* empurra as datas para o fundo */
   display: flex;
   flex-direction: column;
   gap: 8px;

@@ -96,11 +96,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="project-dates">
           <div className="date">
             <CalendarPlus size={24} color="#717171" />
-            <span>{project.startDate}</span>
+            <span>{project.initialDate}</span>
           </div>
           <div className="date">
             <CalendarCheck size={24} color="#717171" />
-            <span>{project.endDate}</span>
+            <span>{project.finalDate}</span>
           </div>
         </div>
       </article>

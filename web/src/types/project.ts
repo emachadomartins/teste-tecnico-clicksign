@@ -2,8 +2,8 @@ export type Project = {
   id: string;
   name: string;
   client: string;
-  startDate: string;
-  endDate: string;
+  initialDate: string;
+  finalDate: string;
   coverUrl?: string;
   isFavorite?: boolean;
 };
