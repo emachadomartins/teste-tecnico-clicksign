@@ -42,3 +42,49 @@ func (p *ProjectModel) Validate() error {
 
 	return nil
 }
+
+type SortBy int
+
+const (
+	SortByName SortBy = iota
+	SortByInitialDate
+	SortByFinalDate
+)
+
+func (s SortBy) String() string {
+	switch s {
+	case SortByName:
+		return "name"
+	case SortByInitialDate:
+		return "initial_date"
+	case SortByFinalDate:
+		return "final_date"
+	default:
+		return "unknown"
+	}
+}
+
+func ToSortBy(s string) SortBy {
+	switch s {
+	case "name":
+		return SortByName
+	case "initial_date":
+		return SortByInitialDate
+	case "final_date":
+		return SortByFinalDate
+	default:
+		return SortByName
+	}
+}
+
+type ProjectFilter struct {
+	Term          string `json:"term"`
+	FavoritesOnly bool   `json:"favorites_only"`
+	Sort          SortBy `json:"sort_by"`
+}
+
+type ProjectQuery struct {
+	Terms         []string `json:"terms"`
+	FavoritesOnly bool     `json:"favorites_only"`
+	Sort          SortBy   `json:"sort_by"`
+}

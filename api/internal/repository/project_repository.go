@@ -24,9 +24,31 @@ func (r *ProjectRepository) Create(ctx context.Context, p *model.ProjectModel) e
 	return r.db.WithContext(ctx).Create(p).Error
 }
 
-func (r *ProjectRepository) FindAll(ctx context.Context) ([]model.ProjectModel, error) {
+func (r *ProjectRepository) FindAll(ctx context.Context, filter model.ProjectQuery) ([]model.ProjectModel, error) {
 	var projects []model.ProjectModel
-	err := r.db.WithContext(ctx).Find(&projects).Error
+	query := r.db.WithContext(ctx).Model(projects)
+
+	if filter.Terms != nil && len(filter.Terms) > 0 {
+		for _, term := range filter.Terms {
+			query = query.Where("lower(name) LIKE ?", "%"+term+"%")
+		}
+	}
+
+	if filter.FavoritesOnly {
+		query = query.Where("is_favorite = ?", true)
+	}
+
+	switch filter.Sort {
+	case model.SortByInitialDate:
+		query = query.Order("initial_date DESC")
+	case model.SortByFinalDate:
+		query = query.Order("final_date ASC")
+	default:
+		query = query.Order("name ASC")
+	}
+
+	err := query.Find(&projects).Error
+
 	return projects, err
 }
 

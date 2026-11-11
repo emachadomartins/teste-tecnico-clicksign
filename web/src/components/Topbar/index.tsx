@@ -2,6 +2,7 @@ import logo from "../../assets/logo.svg";
 import { useSearchHistory } from "../../hooks/useSearchHistory";
 
 import React, { useState } from "react";
+import { useSearchParams } from "react-router";
 import { Icon } from "../Icon";
 import "./styles.css";
 
@@ -12,27 +13,54 @@ export type TopbarProps = {
 export const Topbar: React.FC<TopbarProps> = ({
   hasSearchButton = true,
 }: TopbarProps) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isSearchActive, setIsSearchActive] = React.useState(false);
   const [search, setSearch] = useState("");
   const { addSearch, history } = useSearchHistory();
+
+  const term = searchParams.get("term") || undefined;
 
   const handleSearchClick = () => {
     setIsSearchActive(!isSearchActive);
   };
 
+  const handleSearch = (term: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("favorites_only");
+      next.delete("sort_by");
+      if (term) next.set("term", term);
+      else next.delete("term");
+      return next;
+    });
+    addSearch(term);
+    setSearch("");
+    setIsSearchActive(false);
+  };
+
   return (
     <div className="top-bar">
       <img src={logo} alt="Logo Gerenciador de Projetos" className="logo" />
-      {hasSearchButton && (
-        <Icon
-          className="search-btn"
-          onClick={handleSearchClick}
-          label="Pesquisar"
-          icon="search"
-          color="#FFFFFF"
-          size={32}
-        />
-      )}
+      {hasSearchButton &&
+        (!term ? (
+          <Icon
+            className="search-btn"
+            onClick={handleSearchClick}
+            label="Pesquisar"
+            icon="search"
+            color="#FFFFFF"
+            size={32}
+          />
+        ) : (
+          <Icon
+            className="search-btn"
+            onClick={() => handleSearch("")}
+            label="Cancelar Pesquisa"
+            icon="x"
+            color="#FFFFFF"
+            size={32}
+          />
+        ))}
       {isSearchActive && (
         <div className="search-box">
           <div className="search-field">
@@ -46,7 +74,7 @@ export const Topbar: React.FC<TopbarProps> = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") addSearch(search);
+                if (e.key === "Enter") handleSearch(search);
                 if (e.key === "Escape") handleSearchClick();
               }}
               autoFocus
@@ -65,8 +93,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 <li key={term} className="search-history-item">
                   <button
                     onClick={() => {
-                      setSearch(term);
-                      handleSearchClick();
+                      handleSearch(term);
                     }}
                     className="search-history-button"
                   >

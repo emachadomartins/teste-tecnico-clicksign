@@ -1,15 +1,10 @@
-import type { Project } from "../types/project";
+import type {
+  ApiProject,
+  Project,
+  ProjectInput,
+  ProjectQuery,
+} from "../types/project";
 import { BASE_URL, request } from "./client";
-
-type ApiProject = {
-  id: string;
-  name: string;
-  client: string;
-  is_favorite: boolean;
-  initial_date: string;
-  final_date: string;
-  cover_url?: string;
-};
 
 const toProject = (p: ApiProject): Project => ({
   id: p.id,
@@ -23,17 +18,16 @@ const toProject = (p: ApiProject): Project => ({
     : undefined,
 });
 
-export type ProjectInput = {
-  name: string;
-  client: string;
-  initial_date: string;
-  final_date: string;
-  cover_url?: string;
-};
-
 export const projectsApi = {
-  async list() {
-    const { data, metadata } = await request<ApiProject[]>("/project");
+  async list({ favoritesOnly, term, sort }: ProjectQuery = {}) {
+    const query: string[] = [];
+    if (favoritesOnly) query.push("favorites_only=true");
+    if (term) query.push(`term=${encodeURIComponent(term)}`);
+    if (sort) query.push(`sort_by=${encodeURIComponent(sort)}`);
+
+    const { data, metadata } = await request<ApiProject[]>(
+      "/project" + (query.length > 0 ? `?${query.join("&")}` : ""),
+    );
     return {
       projects: data.map(toProject),
       total: metadata?.total ?? data.length,

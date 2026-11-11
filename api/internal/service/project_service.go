@@ -27,8 +27,12 @@ func NewProjectService(l *utils.LoggerImpl, r *repository.ProjectRepository, s *
 	}
 }
 
-func (s *ProjectService) List(ctx context.Context) ([]model.ProjectModel, error) {
-	return s.repository.FindAll(ctx)
+func (s *ProjectService) List(ctx context.Context, filter model.ProjectFilter) ([]model.ProjectModel, error) {
+	return s.repository.FindAll(ctx, model.ProjectQuery{
+		Terms:         utils.WordToTerms(filter.Term),
+		FavoritesOnly: filter.FavoritesOnly,
+		Sort:          filter.Sort,
+	})
 }
 
 func (s *ProjectService) Create(ctx context.Context, p model.ProjectPayload) (*model.ProjectModel, error) {
@@ -104,7 +108,26 @@ func (s *ProjectService) Update(ctx context.Context, id uuid.UUID, p model.Proje
 }
 
 func (s *ProjectService) Delete(ctx context.Context, id uuid.UUID) error {
-	return s.repository.Delete(ctx, id)
+	project, err := s.repository.FindByID(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	if project == nil {
+		return fmt.Errorf("Project not found: %s", id)
+	}
+	if err := s.repository.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	if project.CoverURL != nil {
+		if err := s.storage.Delete(ctx, *project.CoverURL); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *ProjectService) SetFavorite(ctx context.Context, id uuid.UUID, isFavorite bool) (*model.ProjectModel, error) {

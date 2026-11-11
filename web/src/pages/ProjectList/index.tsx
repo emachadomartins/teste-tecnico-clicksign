@@ -1,41 +1,48 @@
 import { PlusCircle } from "lucide-react";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 import { projectsApi } from "../../api/project";
 import { Button } from "../../components/Button";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { Icon } from "../../components/Icon";
 import { ProjectCard } from "../../components/ProjectCard";
-import type { Project } from "../../types/project";
+import { ProjectEmpty } from "../../components/ProjectEmpty";
+import type { Project, ProjectInput } from "../../types/project";
 import "./styles.css";
 
-const orderOptions = [
-  "Ordem alfabética",
-  "Iniciados mais recentes",
-  "Prazo mais próximo",
-];
+const sortOptions: Partial<Record<keyof ProjectInput, string>> = {
+  name: "Ordem alfabética",
+  initial_date: "Iniciados mais recentes",
+  final_date: "Prazo mais próximo",
+};
 
 export const ProjectList = () => {
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [projectList, setProjectList] = useState<Project[]>([]);
   const [openedFilter, setOpenedFilter] = useState(false);
-  const [orderBy, setOrderBy] = useState("Ordem alfabetica");
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const term = searchParams.get("term") || undefined;
+  const favoritesOnly = searchParams.get("favorites_only") === "true";
+  const sort = (searchParams.get("sort_by") as keyof ProjectInput) || "name";
+
   useEffect(() => {
-    projectsApi.list().then(({ projects }) => {
+    projectsApi.list({ favoritesOnly, sort, term }).then(({ projects }) => {
       setProjectList(projects);
     });
-  }, []);
+  }, [favoritesOnly, sort, term]);
+
+  const isEmpty = !favoritesOnly && !term && projectList.length === 0;
 
   const handleToggleFavorites = () => {
-    setOnlyFavorites(!onlyFavorites);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("favorites_only", String(!favoritesOnly));
+      return next;
+    });
   };
-
-  const visibleProjects = onlyFavorites
-    ? projectList.filter((p) => p.isFavorite)
-    : projectList;
 
   const handleToggleFavorite = (project: Project) => {
     projectsApi.setFavorite(project.id, !project.isFavorite);
@@ -46,8 +53,12 @@ export const ProjectList = () => {
     );
   };
 
-  const handleOrderBy = (option: number) => {
-    setOrderBy(orderOptions[option]);
+  const handleOrderBy = (option: keyof ProjectInput) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("sort_by", option);
+      return next;
+    });
     setOpenedFilter(false);
   };
 
@@ -65,19 +76,21 @@ export const ProjectList = () => {
     }
   };
 
-  return (
+  return isEmpty ? (
+    <ProjectEmpty />
+  ) : (
     <div className="project-list-container">
       <div className="page-header">
         <h1 className="page-title">
           Projetos
-          <span> ({visibleProjects.length})</span>
+          <span> ({projectList.length})</span>
         </h1>
         <div className="project-list-actions">
           <label className="switch">
             <input
               type="checkbox"
               role="switch"
-              checked={onlyFavorites}
+              checked={favoritesOnly}
               onChange={() => handleToggleFavorites()}
             />
             <span className="switch-slider" aria-hidden="true" />
@@ -94,7 +107,7 @@ export const ProjectList = () => {
                 className="project-list-filter-button"
                 onClick={() => setOpenedFilter(!openedFilter)}
               >
-                {orderBy}
+                {sortOptions[sort]}
                 {
                   <Icon
                     icon={openedFilter ? "chevron-up" : "chevron-down"}
@@ -105,13 +118,15 @@ export const ProjectList = () => {
               </button>
               {openedFilter && (
                 <ul className="project-list-options">
-                  {orderOptions.map((option, index) => (
+                  {Object.keys(sortOptions).map((option, index) => (
                     <li key={index} className="project-list-option">
                       <button
                         className="project-list-options-button"
-                        onClick={() => handleOrderBy(index)}
+                        onClick={() =>
+                          handleOrderBy(option as keyof ProjectInput)
+                        }
                       >
-                        {option}
+                        {sortOptions[option as keyof ProjectInput]}
                       </button>
                     </li>
                   ))}
@@ -129,7 +144,7 @@ export const ProjectList = () => {
         </div>
       </div>
       <div className="project-list">
-        {visibleProjects.map((project) => (
+        {projectList.map((project) => (
           <ProjectCard
             key={project.id}
             project={project}

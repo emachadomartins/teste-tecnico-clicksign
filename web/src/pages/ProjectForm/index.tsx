@@ -1,7 +1,9 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ApiError } from "../../api/client";
-import { projectsApi, type ProjectInput } from "../../api/project";
+import { projectsApi } from "../../api/project";
+import { type ProjectInput } from "../../types/project";
+
 import { Button } from "../../components/Button";
 import { FormInput } from "../../components/FormInput";
 import { Icon } from "../../components/Icon";

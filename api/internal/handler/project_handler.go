@@ -18,7 +18,14 @@ type ProjectHandler struct {
 }
 
 func (h *ProjectHandler) GetMany(w http.ResponseWriter, r *http.Request) {
-	projects, err := h.service.List(r.Context())
+	q := r.URL.Query()
+	filter := model.ProjectFilter{
+		Term:          q.Get("term"),
+		FavoritesOnly: q.Get("favorites_only") == "true",
+		Sort:          model.ToSortBy(q.Get("sort_by")),
+	}
+
+	projects, err := h.service.List(r.Context(), filter)
 
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err, h.logger)

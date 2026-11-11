@@ -12,6 +12,7 @@ import {
   Ellipsis,
   History,
   Layers,
+  PlusCircle,
   Search,
   SquarePen,
   Star,
@@ -43,6 +44,7 @@ const icons = {
   "arrow-down": ArrowDown,
   "chevron-up": ChevronUp,
   "chevron-down": ChevronDown,
+  plus: PlusCircle,
 } as const;
 
 export type IconName = keyof typeof icons;
