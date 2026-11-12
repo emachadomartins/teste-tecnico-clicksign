@@ -84,6 +84,6 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 
 - [x] Deploy do front-end — [evandro-home-server.tyrannosaurus-quillback.ts.net](https://evandro-home-server.tyrannosaurus-quillback.ts.net/)
 - [x] Deploy da API — [evandro-home-server.tyrannosaurus-quillback.ts.net/api](https://evandro-home-server.tyrannosaurus-quillback.ts.net/api/project)
-- [ ] Enviar link do repositório
-- [ ] Enviar URL do projeto funcional
-- [ ] Enviar link da documentação de decisões técnicas
+- [x] Enviar link do repositório
+- [x] Enviar URL do projeto funcional
+- [x] Enviar link da documentação de decisões técnicas

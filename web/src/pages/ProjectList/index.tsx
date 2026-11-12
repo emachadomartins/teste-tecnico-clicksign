@@ -1,7 +1,5 @@
 import { PlusCircle } from "lucide-react";
 
-import { useState } from "react";
-import { Link, useSearchParams } from "react-router";
 import { ApiError } from "@/api";
 import {
   Button,
@@ -14,6 +12,8 @@ import {
 } from "@/components";
 import { useProjects } from "@/hooks";
 import { isSortOption, type Project, type SortOption } from "@/types";
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import "./styles.css";
 
 export const ProjectList = () => {
@@ -39,11 +39,7 @@ export const ProjectList = () => {
   } = useProjects({ favoritesOnly, sort, term });
 
   const isEmpty =
-    !isLoading &&
-    !loadError &&
-    !favoritesOnly &&
-    !term &&
-    projects.length === 0;
+    !loadError && !favoritesOnly && !term && projects.length === 0;
   const isSearchResult = Boolean(term);
 
   const updateParam = (key: string, value: string | null) => {

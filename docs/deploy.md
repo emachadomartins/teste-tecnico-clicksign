@@ -168,7 +168,7 @@ O `make deploy` roda o `scripts/deploy.sh`, que:
 2. **Envia os `.env.production`** que existirem na sua máquina, da raiz e de cada pasta do primeiro nível (`api/`, `web/`, `docs/`). Cada um é gravado como `.env` na pasta correspondente do servidor, com permissão `600` (só o seu usuário lê).
 3. **Entra no servidor por SSH** e roda `git pull --ff-only`, `docker compose up -d --build --wait` (que só termina com os containers no ar) e `docker image prune -f` (que apaga as imagens antigas, para o disco não encher a cada deploy). O `--ff-only` faz o pull falhar, em vez de criar um merge, se alguém tiver mudado algo direto no servidor.
 4. **Reaplica a configuração do Funnel.** Os comandos são idempotentes: rodar de novo não duplica nada, e recupera a configuração se ela tiver sido perdida.
-5. **Confere os endereços públicos** (`/`, `/docs/` e `/api/project`) e falha se algum não responder 200. A conferência passa pelo caminho completo, do Funnel até o banco.
+5. **Confere os endereços públicos** (`/`, `/docs/` e `/api/project`) e falha se algum não responder 200 em cerca de 30 segundos. Ele tenta de novo a cada 2 segundos, porque logo depois do `up` a API pode ainda estar conectando no banco. A conferência passa pelo caminho completo, do Funnel até o banco.
 
 #### Os `.env` de produção
 
@@ -203,7 +203,12 @@ DEPLOY_HOST=usuario@100.x.y.z make deploy
 
 **Preparação, uma vez só, no servidor:**
 
-- **Acesso por chave SSH**, sem senha: o script roda sem interação.
+- **Acesso por SSH.** O script abre uma conexão só no começo e reaproveita para todos os comandos, então a senha é pedida uma vez por deploy. Com uma chave SSH, nem essa vez:
+
+  ```sh
+  ssh-copy-id <host>   # rodado na sua máquina, uma vez só
+  ```
+
 - **O `tailscale` sem `sudo`**, porque não há como digitar a senha do `sudo` numa sessão SSH não interativa:
 
   ```sh

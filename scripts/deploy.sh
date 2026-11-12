@@ -12,6 +12,12 @@ step() { printf '\n\033[1;35m==> %s\033[0m\n' "$1"; }
 # Roda sempre a partir da raiz do projeto, de qualquer pasta
 cd "$(dirname "$0")/.."
 
+# Uma conexão SSH só, reaproveitada por todos os comandos: a senha (ou a
+# passphrase da chave) é pedida uma vez por deploy, e não a cada comando
+SSH_SOCKET="${TMPDIR:-/tmp}/deploy-ssh-$$"
+remote() { ssh -o ControlPath="$SSH_SOCKET" "$DEPLOY_HOST" "$@"; }
+close_connection() { ssh -o ControlPath="$SSH_SOCKET" -O exit "$DEPLOY_HOST" 2>/dev/null || true; }
+
 step "Conferindo se tudo foi enviado ao GitHub"
 git fetch --quiet origin main
 if [ -n "$(git log origin/main..main --oneline)" ]; then
@@ -21,6 +27,10 @@ fi
 if [ -n "$(git status --porcelain)" ]; then
   echo "Aviso: há alterações não commitadas. Elas não vão para o servidor."
 fi
+
+step "Conectando ao servidor ($DEPLOY_HOST)"
+ssh -o ControlMaster=yes -o ControlPath="$SSH_SOCKET" -o ControlPersist=yes -N -f "$DEPLOY_HOST"
+trap close_connection EXIT
 
 step "Enviando os .env.production"
 # Os .env.production ficam só na sua máquina (fora do git). Cada um é gravado
@@ -35,12 +45,12 @@ for file in $env_files; do
   target="$DEPLOY_PATH/$dir/.env"
   [ "$dir" = "." ] && target="$DEPLOY_PATH/.env"
   # Gravado com permissão 600: só o seu usuário no servidor consegue ler
-  ssh "$DEPLOY_HOST" "umask 077 && cat > $target" < "$file"
+  remote "umask 077 && cat > $target" < "$file"
   echo "${file#./} → $target"
 done
 
-step "Atualizando o servidor ($DEPLOY_HOST)"
-ssh "$DEPLOY_HOST" bash -s <<EOF
+step "Atualizando o servidor"
+remote bash -s <<EOF
 set -euo pipefail
 cd $DEPLOY_PATH
 git pull --ff-only origin main
@@ -54,7 +64,13 @@ EOF
 step "Conferindo os endereços públicos"
 failed=0
 for path in / /docs/ /api/project; do
-  code=$(curl -s -o /dev/null -m 15 -w '%{http_code}' "$PUBLIC_URL$path" || true)
+  # Logo depois do up, a API pode ainda estar conectando no banco: tenta
+  # de novo a cada 2s, por até cerca de 30s por endereço
+  for _ in $(seq 1 15); do
+    code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "$PUBLIC_URL$path" || true)
+    [ "$code" = 200 ] && break
+    sleep 2
+  done
   echo "$path → $code"
   [ "$code" = 200 ] || failed=1
 done
