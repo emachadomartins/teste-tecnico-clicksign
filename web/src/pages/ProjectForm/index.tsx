@@ -7,6 +7,8 @@ import { type ProjectInput } from "../../types/project";
 import { Button } from "../../components/Button";
 import { FormInput } from "../../components/FormInput";
 import { Icon } from "../../components/Icon";
+import { toDateInputValue } from "../../utils/date";
+import { validate } from "../../utils/projectForm";
 import "./styles.css";
 
 const EMPTY_FORM: ProjectInput = {
@@ -15,35 +17,6 @@ const EMPTY_FORM: ProjectInput = {
   initial_date: "",
   final_date: "",
 };
-
-function toDateInputValue(): string {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() começa em 0
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function validate(
-  form: ProjectInput,
-  today: string,
-  isEditMode: boolean,
-): Record<string, string> {
-  const errors: Record<string, string> = {};
-
-  if (!form.name.trim() || form.name.trim().split(" ").length < 2)
-    errors.name = "Por favor, digite ao menos duas palavra";
-  if (form.client.trim().length < 5)
-    errors.client = "Por favor, digite ao menos uma palavra";
-  if (!form.initial_date) errors.initial_date = "Selecione uma data válida";
-  else if (form.initial_date < today && !isEditMode)
-    errors.initial_date = "A data de início não pode estar no passado";
-  if (!form.final_date) errors.final_date = "Selecione uma data válida";
-  else if (form.initial_date && form.final_date < form.initial_date)
-    errors.final_date = "A data de término deve ser depois da data de início";
-
-  return errors;
-}
 
 export const ProjectForm = () => {
   const navigate = useNavigate();

@@ -1,30 +1,42 @@
+# Configuração comum a todos os serviços:
+# reinicia sozinho após falhas e ao reiniciar o servidor,
+# e limita os logs a 3 arquivos de 10 MB
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  logging:
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   db:
+    <<: *service-defaults
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: projects
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:?defina POSTGRES_DB no .env}
     ports:
-      - "5432:5432"
+      # Acessível só a partir do próprio servidor (usado pelo make dev),
+      # nunca pela rede
+      - "127.0.0.1:5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d projects"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 2s
       timeout: 3s
       retries: 10
 
   api:
+    <<: *service-defaults
     build: ./api
     environment:
       PORT: "3000"
       # Dentro do compose, o banco é acessado pelo nome do serviço (db)
-      DATABASE_URL: host=db user=postgres password=postgres dbname=projects port=5432 sslmode=disable
+      DATABASE_URL: host=db user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} port=5432 sslmode=disable
       UPLOADS_BASE_PATH: /app/uploads
-      ALLOWED_ORIGINS: http://localhost:5000,http://127.0.0.1:5000
-    ports:
-      - "3000:3000"
+    # Sem "ports": a API só é acessada pelo nginx do front, pela rede interna
     volumes:
       - uploads-data:/app/uploads
     depends_on:
@@ -32,11 +44,13 @@ services:
         condition: service_healthy
 
   web:
+    <<: *service-defaults
     build:
       context: ./web
       args:
-        # Acessada pelo navegador, então é o endereço da API visto da sua máquina
-        VITE_API_URL: http://localhost:3000
+        # Caminho relativo: o navegador chama a API no mesmo endereço do front,
+        # e o nginx repassa /api para o container da API
+        VITE_API_URL: /api
     ports:
       - "5000:80"
     depends_on:

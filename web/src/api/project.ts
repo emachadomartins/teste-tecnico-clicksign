@@ -6,7 +6,7 @@ import type {
 } from "../types/project";
 import { BASE_URL, request } from "./client";
 
-const toProject = (p: ApiProject): Project => ({
+export const toProject = (p: ApiProject): Project => ({
   id: p.id,
   name: p.name,
   client: p.client,

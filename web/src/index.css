@@ -16,7 +16,7 @@ select {
 }
 
 .page-header {
-  position: relative; /* referência para o botão de voltar */
+  position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;

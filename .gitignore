@@ -1,2 +1,5 @@
 # Air (hot reload da API)
 api/tmp/
+
+# Credenciais do docker compose
+.env

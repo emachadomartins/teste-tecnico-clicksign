@@ -8,11 +8,11 @@
 }
 
 .project-card {
-  flex: 1; /* o corpo ocupa toda a altura que sobra */
+  flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px; /* espaço mínimo entre título, cliente e datas */
+  gap: 8px;
   padding: 24px;
   text-align: left;
 }
@@ -26,7 +26,7 @@
 
 .project-name,
 .project-description {
-  margin: 0; /* tira as margens padrão do <p>; quem controla é o gap */
+  margin: 0;
 }
 
 .project-image {
@@ -106,7 +106,7 @@
 }
 
 .project-dates {
-  margin-top: auto; /* empurra as datas para o fundo */
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -127,16 +127,16 @@
 }
 
 .card-menu {
-  position: relative; /* referência para o menu */
+  position: relative;
 }
 
 .card-menu-options {
   justify-content: flex-start;
 
   position: absolute;
-  top: calc(100% + 8px); /* logo abaixo do botão "..." */
-  right: 0; /* alinhado pela direita com o botão */
-  z-index: 30; /* por cima dos cards vizinhos */
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
 
   min-width: 240px;
   margin: 0;

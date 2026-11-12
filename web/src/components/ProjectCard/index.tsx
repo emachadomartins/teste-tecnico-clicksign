@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
 import type { Project } from "../../types/project";
+import { formatLongDate } from "../../utils/date";
 import { highlightTerm } from "../../utils/string";
 import { Icon } from "../Icon";
 import "./styles.css";
@@ -21,15 +22,6 @@ const highlightComponents = (text: string, term?: string) => {
     ),
   );
 };
-
-const longDateFormatter = new Intl.DateTimeFormat("pt-BR", {
-  dateStyle: "long",
-  timeZone: "UTC",
-});
-
-function formatLongDate(isoDate: string): string {
-  return longDateFormatter.format(new Date(isoDate));
-}
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,

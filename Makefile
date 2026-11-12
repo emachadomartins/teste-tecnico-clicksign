@@ -1,4 +1,4 @@
-.PHONY: dev db api web stop
+.PHONY: dev db api web stop test
 
 ## Sobe o banco e roda API + front em modo de desenvolvimento
 dev: db
@@ -19,3 +19,13 @@ web:
 ## Para o banco (os dados continuam no volume)
 stop:
 	docker compose stop
+
+test: test-api test-web
+
+## Testes da API
+test-api:
+	cd api && go test ./...
+
+## Testes do front
+test-web:
+	cd web && npm test

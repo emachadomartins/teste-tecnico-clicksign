@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"gerenciador-de-projetos-back/internal/utils"
 	"io"
@@ -41,7 +42,7 @@ func NewLocalStorage(basePath string) *LocalStorage {
 func (s *LocalStorage) Save(ctx context.Context, name string, content io.Reader) (string, error) {
 	head := make([]byte, 512)
 	n, err := io.ReadFull(content, head)
-	if err != nil {
+	if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) && !errors.Is(err, io.EOF) {
 		return "", err
 	}
 	head = head[:n]

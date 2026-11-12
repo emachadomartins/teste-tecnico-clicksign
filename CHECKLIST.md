@@ -43,6 +43,7 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 - [x] Página de criação de projeto
 - [x] Página de edição de projeto
 - [x] Validação dos campos no front-end
+- [ ] Corrigir as mensagens de erro do formulário (o cliente exige 5 caracteres, mas a mensagem diz "ao menos uma palavra"; o nome diz "duas palavra")
 
 ## 🗑️ Remoção
 

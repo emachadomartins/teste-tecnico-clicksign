@@ -5,8 +5,8 @@
 }
 
 .app-content {
-  flex: 1; /* ocupa toda a altura que sobra abaixo da top-bar */
-  min-height: 0; /* permite que o conteúdo encolha e role */
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }

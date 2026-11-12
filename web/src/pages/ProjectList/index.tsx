@@ -70,7 +70,6 @@ export const ProjectList = () => {
       setProjectList((prev) => prev.filter((p) => p.id !== projectToDelete.id));
       setProjectToDelete(null);
     } catch {
-      // mostrar um erro (dentro do modal, por exemplo)
     } finally {
       setIsDeleting(false);
     }
