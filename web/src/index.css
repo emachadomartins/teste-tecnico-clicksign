@@ -47,7 +47,7 @@ select {
   align-items: center;
   justify-content: space-between;
   height: 40px;
-  padding: 36px 32px 24px;
+  padding: 36px clamp(16px, 3vw, 32px) 24px;
 }
 
 .page-title {
@@ -62,6 +62,4 @@ select {
 
 .page-title span {
   font-weight: 400;
-  font-size: 24px;
-  line-height: 30px;
 }

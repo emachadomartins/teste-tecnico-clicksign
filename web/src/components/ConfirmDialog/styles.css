@@ -1,7 +1,5 @@
 .confirm-dialog {
   overflow: visible;
-  padding: 48px;
-  align-items: center;
   text-align: center;
   max-width: 420px;
   width: calc(100% - 32px);

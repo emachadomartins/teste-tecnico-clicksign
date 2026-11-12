@@ -14,14 +14,12 @@
   flex-direction: column;
   gap: 8px;
   padding: 24px;
-  text-align: left;
 }
 
 .project-cover {
   position: relative;
   height: 230px;
   flex-shrink: 0;
-  border-radius: 16px 16px 0 0;
 }
 
 .project-name,
@@ -58,39 +56,15 @@
   gap: 8px;
 }
 
-.project-actions > button {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-  display: flex;
-  align-items: center;
-}
-
-.project-actions .ellipsis-button svg {
-  filter: drop-shadow(0 2px 4px var(--color-shadow));
-}
-
-.project-actions .favorite-button svg {
-  filter: drop-shadow(0 2px 4px var(--color-shadow));
-}
-
 .project-name {
-  font-style: normal;
   font-weight: 700;
   font-size: 24px;
   line-height: 25px;
-
-  margin-top: 0;
 
   color: var(--color-heading);
 }
 
 .project-description {
-  font-style: normal;
-  font-weight: 400;
   font-size: 18px;
   line-height: 20px;
 
@@ -119,20 +93,12 @@
   align-items: center;
   gap: 8px;
 
-  font-family: "Encode Sans Semi Expanded";
-  font-weight: 400;
   font-size: 16px;
   line-height: 20px;
   color: var(--color-text-muted);
 }
 
-.card-menu {
-  position: relative;
-}
-
 .card-menu-options {
-  justify-content: flex-start;
-
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
