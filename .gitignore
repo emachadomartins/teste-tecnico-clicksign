@@ -3,3 +3,8 @@ api/tmp/
 
 # Credenciais do docker compose
 .env
+
+# Site da documentação (VitePress)
+docs/node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/

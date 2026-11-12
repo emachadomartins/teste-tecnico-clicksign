@@ -36,7 +36,10 @@ services:
       # Dentro do compose, o banco é acessado pelo nome do serviço (db)
       DATABASE_URL: host=db user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} port=5432 sslmode=disable
       UPLOADS_BASE_PATH: /app/uploads
-    # Sem "ports": a API só é acessada pelo nginx do front, pela rede interna
+    # As portas são publicadas só em 127.0.0.1: o acesso de fora passa
+    # pelo Tailscale Funnel (ver docs/deploy.md)
+    ports:
+      - "127.0.0.1:3000:3000"
     volumes:
       - uploads-data:/app/uploads
     depends_on:
@@ -52,9 +55,21 @@ services:
         # e o nginx repassa /api para o container da API
         VITE_API_URL: /api
     ports:
-      - "5000:80"
+      - "127.0.0.1:5000:80"
     depends_on:
       - api
+
+  docs:
+    <<: *service-defaults
+    build:
+      # A raiz, porque o site usa o README.md como página inicial
+      context: .
+      dockerfile: docs/Dockerfile
+      args:
+        # O site é publicado em /docs (ver docs/deploy.md)
+        DOCS_BASE: /docs/
+    ports:
+      - "127.0.0.1:4000:80"
 
 volumes:
   db-data:

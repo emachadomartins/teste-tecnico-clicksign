@@ -1,4 +1,4 @@
-.PHONY: dev db api web stop test lint format
+.PHONY: dev db api web docs stop test lint format
 
 ## Sobe o banco e roda API + front em modo de desenvolvimento
 dev: db
@@ -15,6 +15,10 @@ api:
 ## Front com Vite
 web:
 	cd web && npm run dev
+
+## Site da documentação (VitePress)
+docs:
+	cd docs && npm install --no-audit --no-fund --silent && npm run dev
 
 ## Para o banco (os dados continuam no volume)
 stop:

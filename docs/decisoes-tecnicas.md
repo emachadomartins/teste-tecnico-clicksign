@@ -24,6 +24,7 @@ Este documento registra as principais decisões tomadas no projeto: o contexto d
 | [Testes](#testes)                                      | Testes unitários de funções puras, nos dois lados                           |
 | [Organização do código](#organização-do-código)        | Dependências montadas num lugar só, hooks para os dados e imports com `@/`  |
 | [Ambiente e deploy](#ambiente-e-deploy)                | Docker Compose, com o nginx servindo o front e repassando a API             |
+| [Documentação](#documentação)                          | Markdown legível no GitHub e também publicado como site, com o VitePress    |
 
 ---
 
@@ -426,7 +427,29 @@ O `make lint` roda o `gofmt` e o `go vet` na API, e o [oxlint](https://oxc.rs) e
 
 **Decisão:** o nginx que serve o front também repassa as requisições de `/api/*` para o container da API. O front é gerado com o endereço da API relativo (`/api`).
 
-**Por quê:** o navegador acessa o front e a API no mesmo endereço. A mesma imagem funciona em qualquer IP ou domínio, sem precisar gerar o front de novo, e o CORS deixa de ser necessário. A API não expõe nenhuma porta, e o banco só aceita conexões do próprio servidor.
+**Por quê:** o navegador acessa o front e a API no mesmo endereço. A mesma imagem funciona em qualquer IP ou domínio, sem precisar gerar o front de novo, e o CORS deixa de ser necessário.
+
+Publicado pelo Tailscale Funnel (abaixo), o `/api` chega direto na API, e esse repasse do nginx fica sendo usado só quando o front é acessado sem o Funnel, como em http://localhost:5000.
+
+### Publicação com o Tailscale Funnel
+
+**Decisão:** a aplicação roda com o Docker Compose num servidor próprio, e é publicada na internet pelo [Tailscale Funnel](https://tailscale.com/kb/1223/funnel), num endereço só, com um caminho para cada serviço: o front em `/`, a documentação em `/docs` e a API em `/api`. As portas dos containers só respondem em `127.0.0.1`.
+
+**Por quê:**
+
+- **HTTPS sem configuração:** o Funnel gera e renova o certificado, e o servidor não precisa abrir nenhuma porta no roteador nem ter um IP público fixo.
+- **Um endereço só:** o avaliador recebe uma URL, e a partir dela chega ao front, à documentação e à API. Como o front e a API ficam no mesmo endereço, o CORS continua desnecessário.
+- **Nada exposto por fora:** com as portas presas ao `127.0.0.1`, o único caminho de fora até os containers é o Funnel. O banco também só aceita conexões do próprio servidor.
+
+O front ficou na raiz, e não em `/web`, porque o Funnel não redireciona: com o front em `/web`, quem abrisse o endereço principal veria uma página vazia. Na raiz, o front também não precisa saber em que caminho está publicado. A documentação, que fica num subcaminho, é gerada com `base: "/docs/"`.
+
+**Alternativas consideradas:**
+
+- **Uma plataforma de hospedagem** (Render, Railway, Fly.io): dispensa o servidor, mas exigiria um banco gerenciado e um storage persistente para as capas, e cada serviço teria um endereço diferente.
+- **Abrir as portas no roteador, com um proxy HTTPS** (Caddy, nginx): exige IP fixo ou DNS dinâmico, e deixa o servidor de casa exposto diretamente à internet.
+- **Kubernetes:** não resolve nenhum problema desta aplicação, que tem um container por serviço, e acrescentaria complexidade sem ganho.
+
+**Custo:** a disponibilidade depende do servidor de casa e da conexão dele. A configuração do Funnel fica no Tailscale do servidor, e não no repositório, então ela está descrita passo a passo no [guia de deploy](deploy.md#publicação-com-o-tailscale-funnel).
 
 ### Configuração por variáveis de ambiente
 
@@ -435,6 +458,32 @@ As credenciais do banco ficam num `.env` fora do repositório, e cada aplicaçã
 ### Desenvolvimento
 
 O `make dev` sobe o banco no Docker e roda a API (com recarga automática pelo [Air](https://github.com/air-verse/air)) e o front (com o Vite) ao mesmo tempo. O Air está registrado como ferramenta no `go.mod`, então quem clona o repositório não precisa instalá-lo à parte.
+
+---
+
+## Documentação
+
+### Os mesmos Markdown, também como site
+
+**Decisão:** a documentação é escrita em Markdown, na pasta `docs/` e no `README.md`, e também é publicada como um site com o [VitePress](https://vitepress.dev/). O `make docs` sobe o site em desenvolvimento, e o serviço `docs` do Docker Compose serve a versão estática, na porta 4000.
+
+**Por quê:** os arquivos continuam legíveis direto no GitHub, que é onde um avaliador costuma começar, e o site acrescenta o que o Markdown solto não tem: menu lateral, sumário de cada página e busca. O VitePress é baseado no Vite, que o front já usa, e lê os arquivos como estão, sem exigir uma sintaxe própria.
+
+Para os mesmos arquivos funcionarem nos dois lugares, a configuração do site:
+
+- usa o `README.md` como página inicial, e as páginas de `docs/` na raiz do site (`/api`, `/deploy`);
+- converte os links escritos para o GitHub (`../README.md`, `docs/api.md`) para as URLs do site;
+- gera as âncoras dos títulos no formato do GitHub, mantendo os acentos (`#atualização-e-favoritos`), para os links internos, como o sumário deste documento, funcionarem igual nos dois.
+
+O VitePress tem o seu próprio `package.json` dentro de `docs/`, separado do front. A imagem Docker usa a raiz do repositório como contexto, por causa do `README.md`, e o `docs/Dockerfile.dockerignore` limita o envio ao `README.md` e à pasta `docs/`.
+
+**Alternativas consideradas:**
+
+- **Docsify:** não tem build, e renderiza o Markdown no navegador. É o mais simples de configurar, mas o conteúdo só aparece depois de o JavaScript carregar, e a busca e a navegação são mais limitadas.
+- **MkDocs com o tema Material:** muito completo, mas traria o Python como dependência a mais para um projeto feito em Go e Node.
+- **Só os Markdown no GitHub:** funciona, mas sem busca nem navegação entre as páginas.
+
+**Custo:** é um `package.json` e um container a mais para manter, e a conversão de links e âncoras é uma configuração própria, que precisa acompanhar novos padrões de link que surgirem nos documentos.
 
 ---
 

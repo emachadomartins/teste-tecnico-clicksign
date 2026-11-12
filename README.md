@@ -1,6 +1,15 @@
 # Gerenciador de Projetos
 
+- **Repositório:** [github.com/emachadomartins/teste-tecnico-clicksign](https://github.com/emachadomartins/teste-tecnico-clicksign)
+- **Aplicação em produção:** _em breve_
+
 Aplicação para cadastrar e acompanhar projetos: listar, buscar, criar, editar, remover e favoritar, com uma imagem de capa opcional para cada projeto.
+
+## Sobre este projeto
+
+Este projeto foi desenvolvido como **teste técnico para o processo seletivo da [Clicksign](https://www.clicksign.com)**. O desafio pede um gerenciador de projetos completo, com front-end e API, seguindo um design de referência no Figma: listagem com filtro e ordenação, busca com destaque do termo e histórico, formulários com validação e upload de capa, remoção com confirmação e favoritos.
+
+Além de cumprir os requisitos, o objetivo foi mostrar como o projeto foi pensado: cada escolha relevante está registrada nas [decisões técnicas](docs/decisoes-tecnicas.md), com as alternativas consideradas e o custo de cada uma. A aplicação vem com testes, lint, documentação das rotas e um ambiente que sobe inteiro com o Docker Compose.
 
 O repositório tem duas aplicações independentes:
 
@@ -18,6 +27,12 @@ O repositório tem duas aplicações independentes:
 | [docs/backend.md](docs/backend.md) | Estrutura de pastas da API, camadas, busca, armazenamento de capas e dependências |
 | [docs/frontend.md](docs/frontend.md) | Estrutura de pastas do front, páginas, componentes, hooks e dependências |
 | [docs/deploy.md](docs/deploy.md) | Como publicar a aplicação completa com Docker Compose |
+
+A documentação também pode ser lida como um site, com menu lateral e busca, gerado pelo [VitePress](https://vitepress.dev/) a partir dos mesmos arquivos:
+
+```sh
+make docs   # http://localhost:4000/docs/
+```
 
 ## Como funciona
 
@@ -91,6 +106,7 @@ Na primeira execução, a API cria a tabela de projetos e ativa a extensão `una
 | `make db` | Sobe só o Postgres |
 | `make api` | Roda só a API, com recarga automática ([Air](https://github.com/air-verse/air)) |
 | `make web` | Roda só o front ([Vite](https://vite.dev/)) |
+| `make docs` | Sobe o site da documentação em http://localhost:4000/docs/ |
 | `make stop` | Para os containers do compose (os dados continuam salvos) |
 | `make test` | Roda os testes da API e do front |
 | `make test-api` / `make test-web` | Roda os testes de um lado só |
@@ -134,7 +150,7 @@ A aplicação fica em http://localhost:5000, e a API é acessada pelo mesmo ende
 .
 ├── api/                  API em Go (detalhes em docs/backend.md)
 ├── web/                  Front em React (detalhes em docs/frontend.md)
-├── docs/                 Documentação
+├── docs/                 Documentação (e a config do site, em docs/.vitepress)
 ├── docker-compose.yml    Banco, API e front em containers
 ├── Makefile              Atalhos de desenvolvimento e testes
 ├── .env.example          Credenciais do Postgres para o Compose
