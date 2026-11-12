@@ -148,6 +148,7 @@ export const ProjectList = () => {
           <ProjectCard
             key={project.id}
             project={project}
+            term={term}
             onFavorite={handleToggleFavorite}
             onDelete={setProjectToDelete}
           />

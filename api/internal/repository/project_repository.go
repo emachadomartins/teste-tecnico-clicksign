@@ -30,7 +30,8 @@ func (r *ProjectRepository) FindAll(ctx context.Context, filter model.ProjectQue
 
 	if filter.Terms != nil && len(filter.Terms) > 0 {
 		for _, term := range filter.Terms {
-			query = query.Where("lower(name) LIKE ?", "%"+term+"%")
+			like := "%" + term + "%"
+			query = query.Where("(unaccent(lower(name)) LIKE ? OR unaccent(lower(client)) LIKE ?)", like, like)
 		}
 	}
 

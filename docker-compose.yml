@@ -9,6 +9,39 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d projects"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./api
+    environment:
+      PORT: "3000"
+      # Dentro do compose, o banco é acessado pelo nome do serviço (db)
+      DATABASE_URL: host=db user=postgres password=postgres dbname=projects port=5432 sslmode=disable
+      UPLOADS_BASE_PATH: /app/uploads
+      ALLOWED_ORIGINS: http://localhost:5000,http://127.0.0.1:5000
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads-data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      args:
+        # Acessada pelo navegador, então é o endereço da API visto da sua máquina
+        VITE_API_URL: http://localhost:3000
+    ports:
+      - "5000:80"
+    depends_on:
+      - api
 
 volumes:
   db-data:
+  uploads-data:

@@ -97,6 +97,14 @@
   color: #717171;
 }
 
+.project-name mark,
+.project-description mark {
+  background: #ffb23d;
+  padding: 0 5px;
+  border-radius: 100px;
+  color: #ffffff;
+}
+
 .project-dates {
   margin-top: auto; /* empurra as datas para o fundo */
   display: flex;

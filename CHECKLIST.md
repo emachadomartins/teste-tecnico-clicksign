@@ -9,55 +9,55 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 ## 🏗️ Setup
 
 - [x] Inicializar repositório Git
-- [ ] Criar estrutura de pastas do projeto do backend (Go)
-- [ ] Criar estrutura de pstas do projeto do frontend (React)
-- [ ] Configurar banco de dados
+- [x] Criar estrutura de pastas do projeto do backend (Go)
+- [x] Criar estrutura de pstas do projeto do frontend (React)
+- [x] Configurar banco de dados
 - [ ] Configurar lint/formatter
-- [ ] Configurar variáveis de ambiente (`.env.example`)
+- [x] Configurar variáveis de ambiente (`.env.example`)
 
 ## 🔌 API
 
-- [ ] `[GET] /projects` — listar projetos
-- [ ] `[GET] /projects/:id` — detalhar projeto
-- [ ] `[POST] /projects` — criar projeto
-- [ ] `[PUT|PATCH] /projects/:id` — editar projeto
-- [ ] `[DELETE] /projects/:id` — remover projeto
-- [ ] `[PATCH] /projects/:id/favorite` — favoritar/desfavoritar
-- [ ] Suporte a busca, filtro de favoritos e ordenação (query params)
+- [x] `[GET] /projects` — listar projetos
+- [x] `[GET] /projects/:id` — detalhar projeto
+- [x] `[POST] /projects` — criar projeto
+- [x] `[PUT|PATCH] /projects/:id` — editar projeto
+- [x] `[DELETE] /projects/:id` — remover projeto
+- [x] `[PATCH] /projects/:id/favorite` — favoritar/desfavoritar
+- [x] Suporte a busca, filtro de favoritos e ordenação (query params)
 - [ ] Validação dos dados de entrada
 - [ ] Tratamento de erros padronizado
 
 ## 📋 Listagem
 
-- [ ] Estado vazio (nenhum projeto cadastrado), conforme o design
-- [ ] Exibir título da página
+- [x] Estado vazio (nenhum projeto cadastrado), conforme o design
+- [x] Exibir título da página
 - [ ] Exibir total de projetos cadastrados
-- [ ] Filtro para exibir apenas favoritos
-- [ ] Ordenação:
-  - [ ] Ordem alfabética (padrão)
-  - [ ] Projetos iniciados mais recentemente
-  - [ ] Projetos próximos à data de finalização
+- [x] Filtro para exibir apenas favoritos
+- [x] Ordenação:
+  - [x] Ordem alfabética (padrão)
+  - [x] Projetos iniciados mais recentemente
+  - [x] Projetos próximos à data de finalização
 
 ## 📝 Formulários
 
-- [ ] Página de criação de projeto
-- [ ] Página de edição de projeto
-- [ ] Validação dos campos no front-end
+- [x] Página de criação de projeto
+- [x] Página de edição de projeto
+- [x] Validação dos campos no front-end
 
 ## 🗑️ Remoção
 
-- [ ] Modal de confirmação de remoção
+- [x] Modal de confirmação de remoção
 
 ## ⭐ Favoritos
 
-- [ ] Favoritar/desfavoritar projetos
+- [x] Favoritar/desfavoritar projetos
 
 ## 🔍 Busca
 
-- [ ] Barra de busca
+- [x] Barra de busca
 - [ ] Disparar busca somente com no mínimo 3 caracteres
-- [ ] Histórico das últimas 5 buscas
-- [ ] Highlight do termo buscado nos resultados
+- [x] Histórico das últimas 5 buscas
+- [x] Highlight do termo buscado nos resultados
 
 ## 🎨 Fidelidade ao design
 
