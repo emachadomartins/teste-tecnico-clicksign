@@ -78,11 +78,12 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 - [x] README com instruções para rodar o projeto localmente
 - [x] Documento de decisões técnicas (stack, arquitetura, trade-offs)
 - [x] Documentação dos endpoints da API
+- [x] Site da documentação (VitePress) — [evandro-home-server.tyrannosaurus-quillback.ts.net/docs](https://evandro-home-server.tyrannosaurus-quillback.ts.net/docs/)
 
 ## 🚀 Entrega
 
-- [ ] Deploy do front-end
-- [ ] Deploy da API
+- [x] Deploy do front-end — [evandro-home-server.tyrannosaurus-quillback.ts.net](https://evandro-home-server.tyrannosaurus-quillback.ts.net/)
+- [x] Deploy da API — [evandro-home-server.tyrannosaurus-quillback.ts.net/api](https://evandro-home-server.tyrannosaurus-quillback.ts.net/api/project)
 - [ ] Enviar link do repositório
 - [ ] Enviar URL do projeto funcional
 - [ ] Enviar link da documentação de decisões técnicas

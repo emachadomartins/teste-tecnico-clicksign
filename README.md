@@ -1,7 +1,7 @@
 # Gerenciador de Projetos
 
-- **Repositório:** [github.com/emachadomartins/teste-tecnico-clicksign](https://github.com/emachadomartins/teste-tecnico-clicksign)
-- **Aplicação em produção:** _em breve_
+- **Repositório:** [Github](https://github.com/emachadomartins/teste-tecnico-clicksign)
+- **Aplicação em produção:** [evandro-home-server.tyrannosaurus-quillback.ts.net](https://evandro-home-server.tyrannosaurus-quillback.ts.net/)
 
 Aplicação para cadastrar e acompanhar projetos: listar, buscar, criar, editar, remover e favoritar, com uma imagem de capa opcional para cada projeto.
 
@@ -13,20 +13,20 @@ Além de cumprir os requisitos, o objetivo foi mostrar como o projeto foi pensad
 
 O repositório tem duas aplicações independentes:
 
-| Pasta | O que é | Stack |
-|---|---|---|
-| [`api/`](api) | API REST que guarda os projetos e as capas | Go, chi, GORM, PostgreSQL |
-| [`web/`](web) | Interface web | React, TypeScript, Vite, React Router |
+| Pasta         | O que é                                    | Stack                                 |
+| ------------- | ------------------------------------------ | ------------------------------------- |
+| [`api/`](api) | API REST que guarda os projetos e as capas | Go, chi, GORM, PostgreSQL             |
+| [`web/`](web) | Interface web                              | React, TypeScript, Vite, React Router |
 
 ## Documentação
 
-| Documento | Conteúdo |
-|---|---|
+| Documento                                              | Conteúdo                                                                                    |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | [docs/decisoes-tecnicas.md](docs/decisoes-tecnicas.md) | As decisões técnicas do projeto, com as alternativas consideradas e o custo de cada escolha |
-| [docs/api.md](docs/api.md) | Todas as rotas da API, com parâmetros, payloads, respostas e códigos de status |
-| [docs/backend.md](docs/backend.md) | Estrutura de pastas da API, camadas, busca, armazenamento de capas e dependências |
-| [docs/frontend.md](docs/frontend.md) | Estrutura de pastas do front, páginas, componentes, hooks e dependências |
-| [docs/deploy.md](docs/deploy.md) | Como publicar a aplicação completa com Docker Compose |
+| [docs/api.md](docs/api.md)                             | Todas as rotas da API, com parâmetros, payloads, respostas e códigos de status              |
+| [docs/backend.md](docs/backend.md)                     | Estrutura de pastas da API, camadas, busca, armazenamento de capas e dependências           |
+| [docs/frontend.md](docs/frontend.md)                   | Estrutura de pastas do front, páginas, componentes, hooks e dependências                    |
+| [docs/deploy.md](docs/deploy.md)                       | Como publicar a aplicação completa com Docker Compose                                       |
 
 A documentação também pode ser lida como um site, com menu lateral e busca, gerado pelo [VitePress](https://vitepress.dev/) a partir dos mesmos arquivos:
 
@@ -90,38 +90,39 @@ Os filtros da listagem (busca, favoritos e ordenação) ficam na URL, por exempl
 
    O comando sobe o Postgres no Docker, espera ele ficar pronto, e roda a API e o front lado a lado, os dois recarregando sozinhos quando um arquivo é salvo.
 
-| Serviço | Endereço |
-|---|---|
-| Front | http://localhost:5000 |
-| API | http://localhost:3000 |
-| Postgres | `localhost:5432` |
+| Serviço  | Endereço              |
+| -------- | --------------------- |
+| Front    | http://localhost:5000 |
+| API      | http://localhost:3000 |
+| Postgres | `localhost:5432`      |
 
 Na primeira execução, a API cria a tabela de projetos e ativa a extensão `unaccent` do Postgres, usada pela busca.
 
 ### Comandos do Makefile
 
-| Comando | O que faz |
-|---|---|
-| `make dev` | Sobe o banco e roda a API e o front em modo de desenvolvimento |
-| `make db` | Sobe só o Postgres |
-| `make api` | Roda só a API, com recarga automática ([Air](https://github.com/air-verse/air)) |
-| `make web` | Roda só o front ([Vite](https://vite.dev/)) |
-| `make docs` | Sobe o site da documentação em http://localhost:4000/docs/ |
-| `make stop` | Para os containers do compose (os dados continuam salvos) |
-| `make test` | Roda os testes da API e do front |
-| `make test-api` / `make test-web` | Roda os testes de um lado só |
+| Comando                           | O que faz                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `make dev`                        | Sobe o banco e roda a API e o front em modo de desenvolvimento                                   |
+| `make db`                         | Sobe só o Postgres                                                                               |
+| `make api`                        | Roda só a API, com recarga automática ([Air](https://github.com/air-verse/air))                  |
+| `make web`                        | Roda só o front ([Vite](https://vite.dev/))                                                      |
+| `make docs`                       | Sobe o site da documentação em http://localhost:4000/docs/                                       |
+| `make stop`                       | Para os containers do compose (os dados continuam salvos)                                        |
+| `make test`                       | Roda os testes da API e do front                                                                 |
+| `make test-api` / `make test-web` | Roda os testes de um lado só                                                                     |
+| `make deploy`                     | Publica no servidor a versão que está no GitHub ([detalhes](docs/deploy.md#deploy-automatizado)) |
 
 ## Variáveis de ambiente
 
-| Arquivo | Variável | Para quê |
-|---|---|---|
-| `.env` | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Credenciais do Postgres criado pelo Docker Compose |
-| `api/.env` | `PORT` | Porta da API (padrão `8080`; o exemplo usa `3000`) |
-| `api/.env` | `DATABASE_URL` | Conexão com o Postgres. Use `host=localhost` rodando na sua máquina e `host=db` dentro do Compose |
-| `api/.env` | `UPLOADS_BASE_PATH` | Pasta onde as capas são salvas (padrão `uploads`) |
-| `api/.env` | `ALLOWED_ORIGINS` | Origens liberadas no CORS, separadas por vírgula (o endereço do front) |
-| `web/.env` | `VITE_API_URL` | Endereço da API, usado pelo navegador |
-| `web/.env` | `VITE_PORT` | Porta do servidor de desenvolvimento do front (padrão `5000`) |
+| Arquivo    | Variável                                            | Para quê                                                                                          |
+| ---------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `.env`     | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Credenciais do Postgres criado pelo Docker Compose                                                |
+| `api/.env` | `PORT`                                              | Porta da API (padrão `8080`; o exemplo usa `3000`)                                                |
+| `api/.env` | `DATABASE_URL`                                      | Conexão com o Postgres. Use `host=localhost` rodando na sua máquina e `host=db` dentro do Compose |
+| `api/.env` | `UPLOADS_BASE_PATH`                                 | Pasta onde as capas são salvas (padrão `uploads`)                                                 |
+| `api/.env` | `ALLOWED_ORIGINS`                                   | Origens liberadas no CORS, separadas por vírgula (o endereço do front)                            |
+| `web/.env` | `VITE_API_URL`                                      | Endereço da API, usado pelo navegador                                                             |
+| `web/.env` | `VITE_PORT`                                         | Porta do servidor de desenvolvimento do front (padrão `5000`)                                     |
 
 ## Testes
 

@@ -1,4 +1,4 @@
-.PHONY: dev db api web docs stop test lint format
+.PHONY: dev db api web docs stop test lint format deploy
 
 ## Sobe o banco e roda API + front em modo de desenvolvimento
 dev: db
@@ -41,3 +41,7 @@ lint:
 format:
 	cd api && gofmt -w .
 	cd web && npm run format
+
+## Publica no servidor a versão do GitHub (ver docs/deploy.md)
+deploy:
+	./scripts/deploy.sh

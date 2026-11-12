@@ -23,7 +23,7 @@ Este documento registra as principais decisões tomadas no projeto: o contexto d
 | [Estilos](#estilos)                                    | CSS puro por componente, com as cores em variáveis                          |
 | [Testes](#testes)                                      | Testes unitários de funções puras, nos dois lados                           |
 | [Organização do código](#organização-do-código)        | Dependências montadas num lugar só, hooks para os dados e imports com `@/`  |
-| [Ambiente e deploy](#ambiente-e-deploy)                | Docker Compose, com o nginx servindo o front e repassando a API             |
+| [Ambiente e deploy](#ambiente-e-deploy)                | Docker Compose num servidor próprio, publicado pelo Tailscale Funnel        |
 | [Documentação](#documentação)                          | Markdown legível no GitHub e também publicado como site, com o VitePress    |
 
 ---
@@ -434,6 +434,14 @@ Publicado pelo Tailscale Funnel (abaixo), o `/api` chega direto na API, e esse r
 ### Publicação com o Tailscale Funnel
 
 **Decisão:** a aplicação roda com o Docker Compose num servidor próprio, e é publicada na internet pelo [Tailscale Funnel](https://tailscale.com/kb/1223/funnel), num endereço só, com um caminho para cada serviço: o front em `/`, a documentação em `/docs` e a API em `/api`. As portas dos containers só respondem em `127.0.0.1`.
+
+A aplicação está no ar em [evandro-home-server.tyrannosaurus-quillback.ts.net](https://evandro-home-server.tyrannosaurus-quillback.ts.net/):
+
+| Serviço      | Endereço                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Front        | [https://evandro-home-server.tyrannosaurus-quillback.ts.net/](https://evandro-home-server.tyrannosaurus-quillback.ts.net/)                       |
+| Documentação | [https://evandro-home-server.tyrannosaurus-quillback.ts.net/docs/](https://evandro-home-server.tyrannosaurus-quillback.ts.net/docs/)             |
+| API          | [https://evandro-home-server.tyrannosaurus-quillback.ts.net/api/project](https://evandro-home-server.tyrannosaurus-quillback.ts.net/api/project) |
 
 **Por quê:**
 

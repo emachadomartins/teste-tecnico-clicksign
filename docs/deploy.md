@@ -108,7 +108,7 @@ As capas enviadas pelo `make dev` ficam em `api/uploads`, e as enviadas pelo Com
 
 ## Publicação com o Tailscale Funnel
 
-A aplicação é publicada na internet pelo [Tailscale Funnel](https://tailscale.com/kb/1223/funnel), sem abrir portas no roteador. O Funnel recebe as requisições num endereço público com HTTPS, `https://<maquina>.<tailnet>.ts.net`, e repassa cada caminho para uma porta local do servidor:
+A aplicação é publicada na internet pelo [Tailscale Funnel](https://tailscale.com/kb/1223/funnel), sem abrir portas no roteador. A versão em produção está em [evandro-home-server.tyrannosaurus-quillback.ts.net](https://evandro-home-server.tyrannosaurus-quillback.ts.net/). O Funnel recebe as requisições num endereço público com HTTPS, `https://<maquina>.<tailnet>.ts.net`, e repassa cada caminho para uma porta local do servidor:
 
 | Caminho público | Porta local | Serviço |
 | --------------- | ----------- | ------- |
@@ -152,6 +152,65 @@ curl -I https://<maquina>.<tailnet>.ts.net/docs/deploy   # 200
 ```
 
 Depois, abra o front no navegador e crie um projeto com capa, o que passa pelo front, pela API e pelo upload.
+
+### Deploy automatizado
+
+Depois da primeira configuração, as próximas versões são publicadas com um comando, rodado na sua máquina:
+
+```sh
+git push
+make deploy
+```
+
+O `make deploy` roda o `scripts/deploy.sh`, que:
+
+1. **Confere se a `main` local está no GitHub.** O servidor baixa o código do GitHub, e não da sua máquina, então o script recusa o deploy se houver commit sem push. Assim, o que está em produção é sempre um commit conhecido.
+2. **Envia os `.env.production`** que existirem na sua máquina, da raiz e de cada pasta do primeiro nível (`api/`, `web/`, `docs/`). Cada um é gravado como `.env` na pasta correspondente do servidor, com permissão `600` (só o seu usuário lê).
+3. **Entra no servidor por SSH** e roda `git pull --ff-only`, `docker compose up -d --build --wait` (que só termina com os containers no ar) e `docker image prune -f` (que apaga as imagens antigas, para o disco não encher a cada deploy). O `--ff-only` faz o pull falhar, em vez de criar um merge, se alguém tiver mudado algo direto no servidor.
+4. **Reaplica a configuração do Funnel.** Os comandos são idempotentes: rodar de novo não duplica nada, e recupera a configuração se ela tiver sido perdida.
+5. **Confere os endereços públicos** (`/`, `/docs/` e `/api/project`) e falha se algum não responder 200. A conferência passa pelo caminho completo, do Funnel até o banco.
+
+#### Os `.env` de produção
+
+Os `.env.production` ficam só na sua máquina: o `.gitignore` impede que eles vão para o GitHub. Cada um tem as mesmas variáveis do `.env.example` da sua pasta, com os valores de produção:
+
+| Arquivo local          | Gravado no servidor como |
+| ---------------------- | ------------------------ |
+| `.env.production`      | `.env`                   |
+| `api/.env.production`  | `api/.env`               |
+| `web/.env.production`  | `web/.env`               |
+| `docs/.env.production` | `docs/.env`              |
+
+Um arquivo que não existe na sua máquina não é enviado, e o `.env` correspondente do servidor não muda.
+
+Eles são separados dos `.env` de desenvolvimento para que um deploy nunca leve uma senha de dev para produção.
+
+Hoje, o Compose só lê o `.env` da raiz, com as credenciais do Postgres. As variáveis da API são passadas direto no `docker-compose.yml`, o front recebe o endereço da API no build, e os `.dockerignore` deixam os `.env` das pastas fora das imagens. Os arquivos das pastas ficam no servidor para quando algum serviço passar a usá-los.
+
+**Cuidado ao trocar a senha:** o Postgres só lê o `POSTGRES_PASSWORD` na primeira vez que cria o volume. Se a senha do `.env.production` mudar depois, a API passa a usar a nova e o banco continua com a antiga, e a API não conecta. Para trocar a senha, altere-a também dentro do banco (veja [Dados](#dados)).
+
+O script usa estes valores, que podem ser trocados por variáveis de ambiente:
+
+| Variável      | Padrão                                                       | Para quê                                                           |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------------ |
+| `DEPLOY_HOST` | `evandro-home-server`                                        | O host do servidor no `ssh` (nome, IP ou alias do `~/.ssh/config`) |
+| `DEPLOY_PATH` | `/opt/teste-tecnico-clicksign`                               | A pasta do projeto no servidor                                     |
+| `PUBLIC_URL`  | `https://evandro-home-server.tyrannosaurus-quillback.ts.net` | O endereço público, usado na conferência                           |
+
+```sh
+DEPLOY_HOST=usuario@100.x.y.z make deploy
+```
+
+**Preparação, uma vez só, no servidor:**
+
+- **Acesso por chave SSH**, sem senha: o script roda sem interação.
+- **O `tailscale` sem `sudo`**, porque não há como digitar a senha do `sudo` numa sessão SSH não interativa:
+
+  ```sh
+  sudo tailscale set --operator=$USER
+  ```
+
+- **O repositório clonado** na pasta do `DEPLOY_PATH`, com permissão de escrita para o seu usuário. O `.env` pode ser criado à mão ou enviado pelo próprio `make deploy`. Se o repositório for privado, o servidor precisa de uma [deploy key](https://docs.github.com/pt/authentication/connecting-to-github-with-ssh/managing-deploy-keys) para o `git pull`.
 
 ### Desligando
 

@@ -1,8 +1,10 @@
 # Air (hot reload da API)
 api/tmp/
 
-# Credenciais do docker compose
+# Credenciais do docker compose (o .env.production é enviado pelo make deploy)
 .env
+.env.*
+!.env.example
 
 # Site da documentação (VitePress)
 docs/node_modules/
