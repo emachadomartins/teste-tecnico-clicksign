@@ -16,12 +16,25 @@ export const Topbar: React.FC<TopbarProps> = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSearchActive, setIsSearchActive] = React.useState(false);
   const [search, setSearch] = useState("");
-  const { addSearch, history } = useSearchHistory();
+  const { addSearch, removeSearch, history } = useSearchHistory();
 
   const term = searchParams.get("term") || undefined;
 
+  const isShowingResult = hasSearchButton && Boolean(term);
+  const isSearchOpen = isSearchActive || isShowingResult;
+
   const handleSearchClick = () => {
     setIsSearchActive(!isSearchActive);
+  };
+
+  const handleSearchFocus = () => {
+    if (isSearchActive) return;
+    setSearch(term ?? "");
+    setIsSearchActive(true);
+  };
+
+  const handleSearchBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) setIsSearchActive(false);
   };
 
   const handleSearch = (term: string) => {
@@ -41,28 +54,23 @@ export const Topbar: React.FC<TopbarProps> = ({
   return (
     <div className="top-bar">
       <img src={logo} alt="Logo Gerenciador de Projetos" className="logo" />
-      {hasSearchButton &&
-        (!term ? (
-          <Icon
-            className="search-btn"
-            onClick={handleSearchClick}
-            label="Pesquisar"
-            icon="search"
-            color="white"
-            size={32}
-          />
-        ) : (
-          <Icon
-            className="search-btn"
-            onClick={() => handleSearch("")}
-            label="Cancelar Pesquisa"
-            icon="x"
-            color="white"
-            size={32}
-          />
-        ))}
-      {isSearchActive && (
-        <div className="search-box">
+      {hasSearchButton && !isSearchOpen && (
+        <Icon
+          className="search-btn"
+          onClick={handleSearchClick}
+          label="Pesquisar"
+          icon="search"
+          color="white"
+          size={32}
+        />
+      )}
+      {isSearchOpen && (
+        <div
+          className={
+            "search-box" + (isSearchActive ? "" : " search-box--result")
+          }
+          onBlur={handleSearchBlur}
+        >
           <div className="search-field">
             <Icon icon="search" color="primary" size={24} aria-hidden="true" />
             <input
@@ -71,23 +79,20 @@ export const Topbar: React.FC<TopbarProps> = ({
               enterKeyHint="search"
               placeholder="Digite o nome do projeto..."
               aria-label="Buscar projetos"
-              value={search}
+              value={isSearchActive ? search : (term ?? "")}
+              onFocus={handleSearchFocus}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSearch(search);
-                if (e.key === "Escape") handleSearchClick();
+                if (e.key === "Escape") {
+                  setIsSearchActive(false);
+                  e.currentTarget.blur();
+                }
               }}
-              autoFocus
-            />
-            <Icon
-              icon="x"
-              color="primary"
-              size={24}
-              label="Fechar busca"
-              onClick={handleSearchClick}
+              autoFocus={isSearchActive}
             />
           </div>
-          {history.length > 0 && (
+          {isSearchActive && history.length > 0 && (
             <ul className="search-history">
               {history.map((term) => (
                 <li key={term} className="search-history-item">
@@ -105,6 +110,13 @@ export const Topbar: React.FC<TopbarProps> = ({
                     />
                     {term}
                   </button>
+                  <Icon
+                    icon="x"
+                    color="textMuted"
+                    size={20}
+                    label={`Remover "${term}" do histórico`}
+                    onClick={() => removeSearch(term)}
+                  />
                 </li>
               ))}
             </ul>

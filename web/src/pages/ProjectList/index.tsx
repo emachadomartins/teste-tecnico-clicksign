@@ -1,7 +1,7 @@
 import { PlusCircle } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { projectsApi } from "../../api/project";
 import { Button } from "../../components/Button";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -20,6 +20,7 @@ const sortOptions: Partial<Record<keyof ProjectInput, string>> = {
 export const ProjectList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [projectList, setProjectList] = useState<Project[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [openedFilter, setOpenedFilter] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -29,12 +30,17 @@ export const ProjectList = () => {
   const sort = (searchParams.get("sort_by") as keyof ProjectInput) || "name";
 
   useEffect(() => {
-    projectsApi.list({ favoritesOnly, sort, term }).then(({ projects }) => {
-      setProjectList(projects);
+    const filtered = projectsApi.list({ favoritesOnly, sort, term });
+    const all = favoritesOnly ? projectsApi.list() : filtered;
+
+    Promise.all([filtered, all]).then(([filteredResult, allResult]) => {
+      setProjectList(filteredResult.projects);
+      setTotalCount(allResult.total);
     });
   }, [favoritesOnly, sort, term]);
 
   const isEmpty = !favoritesOnly && !term && projectList.length === 0;
+  const isSearchResult = Boolean(term);
 
   const handleToggleFavorites = () => {
     setSearchParams((prev) => {
@@ -68,6 +74,7 @@ export const ProjectList = () => {
     try {
       await projectsApi.delete(projectToDelete.id);
       setProjectList((prev) => prev.filter((p) => p.id !== projectToDelete.id));
+      setTotalCount((prev) => prev - 1);
       setProjectToDelete(null);
     } catch {
     } finally {
@@ -79,69 +86,81 @@ export const ProjectList = () => {
     <ProjectEmpty />
   ) : (
     <div className="project-list-container">
-      <div className="page-header">
-        <h1 className="page-title">
-          Projetos
-          <span> ({projectList.length})</span>
-        </h1>
-        <div className="project-list-actions">
-          <label className="switch">
-            <input
-              type="checkbox"
-              role="switch"
-              checked={favoritesOnly}
-              onChange={() => handleToggleFavorites()}
-            />
-            <span className="switch-slider" aria-hidden="true" />
-            Apenas favoritos
-          </label>
-          <div className="project-list-filter">
-            <div
-              className={
-                "project-list-filter-container" +
-                (openedFilter ? " opened" : "")
-              }
-            >
-              <button
-                className="project-list-filter-button"
-                onClick={() => setOpenedFilter(!openedFilter)}
-              >
-                {sortOptions[sort]}
-                {
-                  <Icon
-                    icon={openedFilter ? "chevron-up" : "chevron-down"}
-                    color="primary"
-                    size={20}
-                  />
-                }
-              </button>
-              {openedFilter && (
-                <ul className="project-list-options">
-                  {Object.keys(sortOptions).map((option, index) => (
-                    <li key={index} className="project-list-option">
-                      <button
-                        className="project-list-options-button"
-                        onClick={() =>
-                          handleOrderBy(option as keyof ProjectInput)
-                        }
-                      >
-                        {sortOptions[option as keyof ProjectInput]}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+      {isSearchResult ? (
+        <>
+          <Link className="page-back-link" to="/">
+            <Icon icon="arrow-left" color="primary" size={16} />
+            Voltar
+          </Link>
+          <div className="page-header page-header--with-back">
+            <h1 className="page-title">Resultado da busca</h1>
           </div>
-          <Button
-            isLink
-            to="/projects/new"
-            icon={<PlusCircle size={24} strokeWidth={2} />}
-          >
-            Novo Projeto
-          </Button>
+        </>
+      ) : (
+        <div className="page-header">
+          <h1 className="page-title">
+            Projetos
+            <span className="page-title-count">({totalCount})</span>
+          </h1>
+          <div className="project-list-actions">
+            <label className="switch">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={favoritesOnly}
+                onChange={() => handleToggleFavorites()}
+              />
+              <span className="switch-slider" aria-hidden="true" />
+              Apenas favoritos
+            </label>
+            <div className="project-list-filter">
+              <div
+                className={
+                  "project-list-filter-container" +
+                  (openedFilter ? " opened" : "")
+                }
+              >
+                <button
+                  className="project-list-filter-button"
+                  onClick={() => setOpenedFilter(!openedFilter)}
+                >
+                  {sortOptions[sort]}
+                  {
+                    <Icon
+                      icon={openedFilter ? "chevron-up" : "chevron-down"}
+                      color="textMuted"
+                      size={20}
+                    />
+                  }
+                </button>
+                {openedFilter && (
+                  <ul className="project-list-options">
+                    {Object.keys(sortOptions).map((option, index) => (
+                      <li key={index} className="project-list-option">
+                        <button
+                          className="project-list-options-button"
+                          onClick={() =>
+                            handleOrderBy(option as keyof ProjectInput)
+                          }
+                        >
+                          {sortOptions[option as keyof ProjectInput]}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+            <Button
+              isLink
+              to="/projects/new"
+              icon={<PlusCircle size={24} strokeWidth={2} />}
+            >
+              Novo projeto
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
       <div className="project-list">
         {projectList.map((project) => (
           <ProjectCard

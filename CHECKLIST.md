@@ -31,7 +31,7 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 
 - [x] Estado vazio (nenhum projeto cadastrado), conforme o design
 - [x] Exibir título da página
-- [ ] Exibir total de projetos cadastrados
+- [x] Exibir total de projetos cadastrados
 - [x] Filtro para exibir apenas favoritos
 - [x] Ordenação:
   - [x] Ordem alfabética (padrão)
@@ -43,7 +43,7 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 - [x] Página de criação de projeto
 - [x] Página de edição de projeto
 - [x] Validação dos campos no front-end
-- [ ] Corrigir as mensagens de erro do formulário (o cliente exige 5 caracteres, mas a mensagem diz "ao menos uma palavra"; o nome diz "duas palavra")
+- [x] Corrigir as mensagens de erro do formulário (o cliente exige 5 caracteres, mas a mensagem diz "ao menos uma palavra"; o nome diz "duas palavra")
 
 ## 🗑️ Remoção
 
@@ -62,22 +62,22 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 
 ## 🎨 Fidelidade ao design
 
-- [ ] Cores, tipografia e espaçamentos conforme o Figma
-- [ ] Ícones e assets exportados do Figma
-- [ ] Responsividade (se prevista no design)
+- [x] Cores, tipografia e espaçamentos conforme o Figma
+- [x] Ícones e assets exportados do Figma
+- [x] Responsividade (se prevista no design)
 - [ ] Estados de loading e erro
 
 ## 🧪 Qualidade
 
-- [ ] Testes da API
-- [ ] Testes do front-end
+- [x] Testes da API
+- [x] Testes do front-end
 - [ ] Código organizado e legível
 
 ## 📚 Documentação
 
-- [ ] README com instruções para rodar o projeto localmente
-- [ ] Documento de decisões técnicas (stack, arquitetura, trade-offs)
-- [ ] Documentação dos endpoints da API
+- [x] README com instruções para rodar o projeto localmente
+- [x] Documento de decisões técnicas (stack, arquitetura, trade-offs)
+- [x] Documentação dos endpoints da API
 
 ## 🚀 Entrega
 

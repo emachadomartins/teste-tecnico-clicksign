@@ -97,13 +97,16 @@
 
   text-align: left;
   background: var(--color-white);
+  color: var(--color-text);
 
-  border-radius: 20px;
+  border: 1px solid var(--color-text-muted);
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .project-list-filter-container.opened {
-  border: 1px solid var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px var(--color-shadow-soft);
 }
 
 .project-list-filter-button {
@@ -111,8 +114,8 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 40px;
-  padding: 12px;
+  height: 38px;
+  padding: 0 16px;
   background: none;
   border: none;
   cursor: pointer;
@@ -123,20 +126,25 @@
 
 .project-list-options {
   margin: 0;
-  padding: 8px 0;
+  padding: 0;
   list-style: none;
   border-top: 1px solid var(--color-primary);
 }
 
 .project-list-option {
-  height: 40px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.project-list-option:last-child {
+  border-bottom: none;
 }
 
 .project-list-options-button {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 0 12px;
+  height: 52px;
+  padding: 0 16px;
   background: none;
   border: none;
   cursor: pointer;
@@ -148,4 +156,18 @@
 
 .project-list-options-button:hover {
   background: var(--color-primary-surface);
+}
+
+.remove-project-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.remove-project-name {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 400;
+  color: var(--color-text);
 }

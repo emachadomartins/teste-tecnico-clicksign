@@ -12,6 +12,12 @@ function readHistory(): string[] {
   }
 }
 
+function saveHistory(history: string[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  } catch {}
+}
+
 export function useSearchHistory() {
   const [history, setHistory] = useState<string[]>(readHistory);
 
@@ -25,12 +31,18 @@ export function useSearchHistory() {
         ...prev.filter((item) => item.toLowerCase() !== trimmed.toLowerCase()),
       ].slice(0, MAX_ITEMS);
 
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {}
+      saveHistory(next);
       return next;
     });
   };
 
-  return { history, addSearch };
+  const removeSearch = (term: string) => {
+    setHistory((prev) => {
+      const next = prev.filter((item) => item !== term);
+      saveHistory(next);
+      return next;
+    });
+  };
+
+  return { history, addSearch, removeSearch };
 }

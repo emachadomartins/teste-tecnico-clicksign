@@ -8,7 +8,7 @@ export function validate(
   const errors: Record<string, string> = {};
 
   if (!form.name.trim() || form.name.trim().split(" ").length < 2)
-    errors.name = "Por favor, digite ao menos duas palavra";
+    errors.name = "Por favor, digite ao menos duas palavras";
   if (form.client.trim().length < 5)
     errors.client = "Por favor, digite ao menos uma palavra";
   if (!form.initial_date) errors.initial_date = "Selecione uma data válida";

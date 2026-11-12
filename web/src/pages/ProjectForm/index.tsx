@@ -170,118 +170,121 @@ export const ProjectForm = () => {
       </Link>
       <div className="project-form-headers">
         <div className="project-form-title">
-          <b>{isEditMode ? "Editar Projeto" : "Novo Projeto"}</b>
+          <b>{isEditMode ? "Editar projeto" : "Novo projeto"}</b>
         </div>
       </div>
 
-      <form className="project-form" onSubmit={handleSubmit} noValidate>
-        <FormInput
-          label="Nome do Projeto"
-          value={form?.name || ""}
-          onChange={(e) => handleChange("name", e.target.value)}
-          onBlur={() => handleBlur("name")}
-          error={errorFor("name")}
-          required
-        />
-        <FormInput
-          label="Cliente"
-          value={form?.client || ""}
-          onChange={(e) => handleChange("client", e.target.value)}
-          onBlur={() => handleBlur("client")}
-          error={errorFor("client")}
-          required
-        />
-        <div className="form-dates">
+      <div className="project-form-panel">
+        <form className="project-form" onSubmit={handleSubmit} noValidate>
           <FormInput
-            label="Data de Início"
-            type="date"
-            value={form?.initial_date || ""}
-            max={form?.final_date || ""}
-            min={isEditMode ? undefined : today}
-            onChange={(e) => handleChange("initial_date", e.target.value)}
-            onBlur={() => handleBlur("initial_date")}
-            error={errorFor("initial_date")}
+            label="Nome do projeto"
+            value={form?.name || ""}
+            onChange={(e) => handleChange("name", e.target.value)}
+            onBlur={() => handleBlur("name")}
+            error={errorFor("name")}
             required
           />
           <FormInput
-            label="Data de Término"
-            type="date"
-            value={form?.final_date || ""}
-            min={form?.initial_date || today}
-            onChange={(e) => handleChange("final_date", e.target.value)}
-            onBlur={() => handleBlur("final_date")}
-            error={errorFor("final_date")}
+            label="Cliente"
+            value={form?.client || ""}
+            onChange={(e) => handleChange("client", e.target.value)}
+            onBlur={() => handleBlur("client")}
+            error={errorFor("client")}
             required
           />
-        </div>
-        <FormInput label="Capa do Projeto" error={coverError ?? undefined}>
-          <div className="file-input cover-field">
-            <label htmlFor={fileInputId} className="file-input-dropzone">
-              <Icon
-                icon="upload"
-                size={24}
-                aria-hidden="true"
-                color="textMuted"
-              />
-              <span className="file-input-text">
-                Escolha uma imagem .jpg ou .png no seu dispositivo
-              </span>
-              <Button
-                variant="secondary"
-                onClick={() => fileInputRef.current?.click()}
-                isFake
-              >
-                Selecionar
-              </Button>
-            </label>
-            {coverToShow && (
-              <>
-                <img
-                  className="cover-field-image"
-                  src={coverToShow}
-                  alt="Capa do projeto"
-                />
-                <div className="cover-field-actions">
-                  <Icon
-                    icon="trash"
-                    color="primary"
-                    className="icon-button"
-                    label="Remover capa"
-                    onClick={handleRemoveCover}
-                    size={20}
-                  />
-                </div>
-              </>
-            )}
-
-            <input
-              id={fileInputId}
-              ref={fileInputRef}
-              type="file"
-              accept="image/png, image/jpeg"
-              className="visually-hidden"
-              onChange={handleCoverChange}
-              tabIndex={-1}
+          <div className="form-dates">
+            <FormInput
+              label="Data de Início"
+              type="date"
+              value={form?.initial_date || ""}
+              max={form?.final_date || ""}
+              min={isEditMode ? undefined : today}
+              onChange={(e) => handleChange("initial_date", e.target.value)}
+              onBlur={() => handleBlur("initial_date")}
+              error={errorFor("initial_date")}
+              required
+            />
+            <FormInput
+              label="Data Final"
+              type="date"
+              value={form?.final_date || ""}
+              min={form?.initial_date || today}
+              onChange={(e) => handleChange("final_date", e.target.value)}
+              onBlur={() => handleBlur("final_date")}
+              error={errorFor("final_date")}
+              required
             />
           </div>
-        </FormInput>
-        {submitError && (
-          <p className="form-submit-error" role="alert">
-            {submitError}
-          </p>
-        )}
-        <Button
-          className="project-form-submit"
-          disabled={!isFormValid || isSubmitting}
-          type="submit"
-        >
-          {isSubmitting
-            ? "Salvando..."
-            : isEditMode
-              ? "Salvar Projeto"
-              : "Criar Projeto"}
-        </Button>
-      </form>
+          <FormInput label="Capa do projeto" error={coverError ?? undefined}>
+            <div
+              className={
+                "file-input cover-field" +
+                (coverToShow ? " cover-field--with-image" : "")
+              }
+            >
+              <label htmlFor={fileInputId} className="file-input-dropzone">
+                <Icon
+                  icon="upload"
+                  size={24}
+                  aria-hidden="true"
+                  color="textMuted"
+                />
+                <span className="file-input-text">
+                  Escolha uma imagem .jpg ou .png no seu dispositivo
+                </span>
+                <Button
+                  variant="secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                  isFake
+                >
+                  Selecionar
+                </Button>
+              </label>
+              {coverToShow && (
+                <>
+                  <img
+                    className="cover-field-image"
+                    src={coverToShow}
+                    alt="Capa do projeto"
+                  />
+                  <div className="cover-field-actions">
+                    <Icon
+                      icon="trash"
+                      color="primary"
+                      className="icon-button"
+                      label="Remover capa"
+                      onClick={handleRemoveCover}
+                      size={20}
+                    />
+                  </div>
+                </>
+              )}
+
+              <input
+                id={fileInputId}
+                ref={fileInputRef}
+                type="file"
+                accept="image/png, image/jpeg"
+                className="visually-hidden"
+                onChange={handleCoverChange}
+                tabIndex={-1}
+              />
+            </div>
+          </FormInput>
+          {submitError && (
+            <p className="form-submit-error" role="alert">
+              {submitError}
+            </p>
+          )}
+          <Button
+            className="project-form-submit"
+            disabled={!isFormValid || isSubmitting}
+            type="submit"
+          >
+            {isSubmitting ? "Salvando..." : "Salvar projeto"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 };

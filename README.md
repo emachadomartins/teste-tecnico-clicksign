@@ -13,6 +13,7 @@ O repositório tem duas aplicações independentes:
 
 | Documento | Conteúdo |
 |---|---|
+| [docs/decisoes-tecnicas.md](docs/decisoes-tecnicas.md) | As decisões técnicas do projeto, com as alternativas consideradas e o custo de cada escolha |
 | [docs/api.md](docs/api.md) | Todas as rotas da API, com parâmetros, payloads, respostas e códigos de status |
 | [docs/backend.md](docs/backend.md) | Estrutura de pastas da API, camadas, busca, armazenamento de capas e dependências |
 | [docs/frontend.md](docs/frontend.md) | Estrutura de pastas do front, páginas, componentes, hooks e dependências |

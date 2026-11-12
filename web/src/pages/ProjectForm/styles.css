@@ -17,6 +17,13 @@
   height: 40px;
 }
 
+.project-form-panel {
+  margin: 0 clamp(16px, 3vw, 40px);
+  padding: 48px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
 .project-form {
   width: 100%;
   max-width: 700px;
@@ -53,7 +60,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   text-align: center;
-  min-height: 420px;
+  min-height: 175px;
   justify-content: center;
   box-sizing: border-box;
 }
@@ -96,6 +103,10 @@
   position: relative;
 }
 
+.cover-field--with-image {
+  aspect-ratio: 16 / 9;
+}
+
 .cover-field-image {
   position: absolute;
   inset: 0;
@@ -107,7 +118,7 @@
 
 .cover-field-actions {
   position: absolute;
-  bottom: 16px;
+  top: 16px;
   right: 16px;
 }
 
@@ -125,13 +136,4 @@
   color: var(--color-primary);
   cursor: pointer;
   box-shadow: 0 4px 4px -2px var(--color-shadow);
-}
-
-.page-back-link {
-  gap: 4px;
-  font-size: 16px;
-  color: var(--color-primary);
-  padding-top: 25px;
-  padding-left: 35px;
-  text-decoration: none;
 }

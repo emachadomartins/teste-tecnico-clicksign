@@ -74,8 +74,6 @@
 .project-name mark,
 .project-description mark {
   background: var(--color-accent);
-  padding: 0 5px;
-  border-radius: 100px;
   color: var(--color-white);
 }
 
@@ -114,14 +112,30 @@
   box-shadow: 0 4px 12px var(--color-shadow-soft);
 }
 
+.card-menu-options::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 10px;
+  width: 12px;
+  height: 12px;
+  background: var(--color-white);
+  transform: rotate(45deg);
+}
+
+.card-menu-options li + li {
+  border-top: 1px solid var(--color-divider);
+}
+
 .card-menu-option {
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 8px;
+  box-sizing: border-box;
   width: 100%;
-  height: 40px;
-  padding: 16px;
+  height: 52px;
+  padding: 0 16px;
   background: none;
   border: none;
   cursor: pointer;

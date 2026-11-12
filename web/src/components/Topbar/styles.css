@@ -7,6 +7,7 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   background: var(--color-dark);
+  box-shadow: 0 2px 4px var(--color-shadow);
   align-items: center;
   padding: 4px 64px;
 }
@@ -30,8 +31,14 @@
   background: var(--color-white);
   color: var(--color-dark);
   border: 2px solid var(--color-primary);
-  border-radius: 32px;
+  border-radius: 8px;
   overflow: hidden;
+}
+
+.search-box--result {
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 4px 4px var(--color-shadow-soft);
 }
 
 .search-input {
@@ -43,6 +50,10 @@
   font-size: 18px;
   line-height: 24px;
 
+  color: var(--color-text);
+}
+
+.search-input::placeholder {
   color: var(--color-text-placeholder);
 }
 
@@ -51,28 +62,35 @@
   align-items: center;
   gap: 16px;
   height: var(--top-bar-height);
-  padding: 0 32px;
+  padding: 0 24px;
   box-sizing: border-box;
 }
 
 .search-history {
   margin: 0;
-  padding: 8px 0;
+  padding: 0;
   list-style: none;
   border-top: 1px solid var(--color-border);
 }
 
 .search-history-item {
+  display: flex;
+  align-items: center;
+  padding-right: 24px;
   border-bottom: 1px solid var(--color-primary-surface);
+}
+
+.search-history-item:last-child {
+  border-bottom: none;
 }
 
 .search-history-button {
   display: flex;
   align-items: center;
-  gap: 16px;
-  width: 100%;
-  height: var(--top-bar-height);
-  padding: 0 32px;
+  gap: 12px;
+  flex: 1;
+  height: 52px;
+  padding: 0 24px;
 
   background: none;
   border: none;
