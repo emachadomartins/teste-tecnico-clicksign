@@ -3,9 +3,7 @@ package handler
 import (
 	"errors"
 	"gerenciador-de-projetos-back/internal/model"
-	"gerenciador-de-projetos-back/internal/repository"
 	"gerenciador-de-projetos-back/internal/service"
-	"gerenciador-de-projetos-back/internal/storage"
 	"io"
 	"net/http"
 
@@ -14,7 +12,7 @@ import (
 
 type ProjectHandler struct {
 	HandlerImpl
-	service service.ProjectService
+	service *service.ProjectService
 }
 
 func (h *ProjectHandler) GetMany(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +26,7 @@ func (h *ProjectHandler) GetMany(w http.ResponseWriter, r *http.Request) {
 	projects, err := h.service.List(r.Context(), filter)
 
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -44,7 +42,7 @@ func (h *ProjectHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	project, err := h.service.Create(r.Context(), payload)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -60,7 +58,7 @@ func (h *ProjectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	project, err := h.service.Read(r.Context(), id)
 	if err != nil {
-		respondError(w, http.StatusNotFound, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -73,11 +71,16 @@ func (h *ProjectHandler) Update(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, err, h.logger)
 		return
 	}
+
 	payload, err := decodeBodyJson[model.ProjectPayload](r)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err, h.logger)
+		return
+	}
 
 	project, err := h.service.Update(r.Context(), id, payload)
 	if err != nil {
-		respondError(w, http.StatusNotFound, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -93,7 +96,7 @@ func (h *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.Delete(r.Context(), id)
 	if err != nil {
-		respondError(w, http.StatusNotFound, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -115,7 +118,7 @@ func (h *ProjectHandler) SetFavorite(w http.ResponseWriter, r *http.Request) {
 
 	project, err := h.service.SetFavorite(r.Context(), id, *payload.IsFavorite)
 	if err != nil {
-		respondError(w, http.StatusNotFound, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -134,6 +137,11 @@ func (h *ProjectHandler) UploadCover(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("cover")
 
 	if err != nil {
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			respondServiceError(w, err, h.logger)
+			return
+		}
 		respondError(w, http.StatusBadRequest, errors.New("cover file is required"), h.logger)
 		return
 	}
@@ -141,8 +149,7 @@ func (h *ProjectHandler) UploadCover(w http.ResponseWriter, r *http.Request) {
 
 	project, err := h.service.UploadCoverImage(r.Context(), id, file)
 	if err != nil {
-		respondError(w, http.StatusNotFound, err, h.logger)
-
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -158,7 +165,7 @@ func (h *ProjectHandler) GetCover(w http.ResponseWriter, r *http.Request) {
 
 	reader, contentType, err := h.service.GetCoverImage(r.Context(), id)
 	if err != nil {
-		respondError(w, http.StatusNotFound, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -181,7 +188,7 @@ func (h *ProjectHandler) DeleteCover(w http.ResponseWriter, r *http.Request) {
 
 	err = h.service.DeleteCoverImage(r.Context(), id)
 	if err != nil {
-		respondError(w, http.StatusNotFound, err, h.logger)
+		respondServiceError(w, err, h.logger)
 		return
 	}
 
@@ -198,17 +205,13 @@ func (h *ProjectHandler) Routes() chi.Router {
 	r.Delete("/{id}", h.Delete)
 	r.Post("/{id}/cover", h.UploadCover)
 	r.Get("/{id}/cover", h.GetCover)
+	r.Delete("/{id}/cover", h.DeleteCover)
 	return r
 }
 
-func NewProjectHandler(
-	repository *repository.ProjectRepository, storage *storage.LocalStorage) *ProjectHandler {
-	h := NewHandler("project")
-
-	s := service.NewProjectService(h.logger, repository, storage)
-
+func NewProjectHandler(s *service.ProjectService) *ProjectHandler {
 	return &ProjectHandler{
-		HandlerImpl: *h,
-		service:     *s,
+		HandlerImpl: *NewHandler("project"),
+		service:     s,
 	}
 }

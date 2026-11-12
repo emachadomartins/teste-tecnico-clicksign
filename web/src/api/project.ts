@@ -1,9 +1,4 @@
-import type {
-  ApiProject,
-  Project,
-  ProjectInput,
-  ProjectQuery,
-} from "../types/project";
+import type { ApiProject, Project, ProjectInput, ProjectQuery } from "@/types";
 import { BASE_URL, request } from "./client";
 
 export const toProject = (p: ApiProject): Project => ({
@@ -14,12 +9,15 @@ export const toProject = (p: ApiProject): Project => ({
   initialDate: p.initial_date,
   finalDate: p.final_date,
   coverUrl: p.cover_url
-    ? `${BASE_URL}/project/${p.id}/cover?v=${encodeURIComponent(p.cover_url)}`
+    ? `${BASE_URL}/project/${p.id}/cover?v=${encodeURIComponent(p.updated_at)}`
     : undefined,
 });
 
 export const projectsApi = {
-  async list({ favoritesOnly, term, sort }: ProjectQuery = {}) {
+  async list(
+    { favoritesOnly, term, sort }: ProjectQuery = {},
+    init?: RequestInit,
+  ) {
     const query: string[] = [];
     if (favoritesOnly) query.push("favorites_only=true");
     if (term) query.push(`term=${encodeURIComponent(term)}`);
@@ -27,14 +25,15 @@ export const projectsApi = {
 
     const { data, metadata } = await request<ApiProject[]>(
       "/project" + (query.length > 0 ? `?${query.join("&")}` : ""),
+      init,
     );
     return {
       projects: data.map(toProject),
       total: metadata?.total ?? data.length,
     };
   },
-  async get(id: string) {
-    const { data } = await request<ApiProject>(`/project/${id}`);
+  async get(id: string, init?: RequestInit) {
+    const { data } = await request<ApiProject>(`/project/${id}`, init);
     return toProject(data);
   },
   async create(input: ProjectInput) {
@@ -78,9 +77,6 @@ export const projectsApi = {
   },
 
   async removeCover(id: string) {
-    const { data } = await request<ApiProject>(`/project/${id}/cover`, {
-      method: "DELETE",
-    });
-    return toProject(data);
+    await request<void>(`/project/${id}/cover`, { method: "DELETE" });
   },
 };

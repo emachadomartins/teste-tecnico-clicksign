@@ -2,6 +2,7 @@ import { useState } from "react";
 
 const STORAGE_KEY = "gerenciador-de-projetos-search-history";
 const MAX_ITEMS = 5;
+export const MIN_SEARCH_LENGTH = 3;
 
 function readHistory(): string[] {
   try {
@@ -23,7 +24,7 @@ export function useSearchHistory() {
 
   const addSearch = (term: string) => {
     const trimmed = term.trim();
-    if (trimmed.length < 3) return;
+    if (trimmed.length < MIN_SEARCH_LENGTH) return;
 
     setHistory((prev) => {
       const next = [

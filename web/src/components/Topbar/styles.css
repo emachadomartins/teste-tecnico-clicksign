@@ -66,6 +66,14 @@
   box-sizing: border-box;
 }
 
+.search-hint {
+  margin: 0;
+  padding: 0 24px 12px 64px;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
 .search-history {
   margin: 0;
   padding: 0;

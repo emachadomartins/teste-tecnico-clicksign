@@ -1,90 +1,91 @@
 import { PlusCircle } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { projectsApi } from "../../api/project";
-import { Button } from "../../components/Button";
-import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { Icon } from "../../components/Icon";
-import { ProjectCard } from "../../components/ProjectCard";
-import { ProjectEmpty } from "../../components/ProjectEmpty";
-import type { Project, ProjectInput } from "../../types/project";
+import { ApiError } from "@/api";
+import {
+  Button,
+  ConfirmDialog,
+  Icon,
+  ProjectCard,
+  ProjectEmpty,
+  SortSelect,
+  Switch,
+} from "@/components";
+import { useProjects } from "@/hooks";
+import { isSortOption, type Project, type SortOption } from "@/types";
 import "./styles.css";
-
-const sortOptions: Partial<Record<keyof ProjectInput, string>> = {
-  name: "Ordem alfabética",
-  initial_date: "Iniciados mais recentes",
-  final_date: "Prazo mais próximo",
-};
 
 export const ProjectList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [projectList, setProjectList] = useState<Project[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [openedFilter, setOpenedFilter] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const term = searchParams.get("term") || undefined;
   const favoritesOnly = searchParams.get("favorites_only") === "true";
-  const sort = (searchParams.get("sort_by") as keyof ProjectInput) || "name";
+  const sortParam = searchParams.get("sort_by");
+  const sort: SortOption = isSortOption(sortParam) ? sortParam : "name";
 
-  useEffect(() => {
-    const filtered = projectsApi.list({ favoritesOnly, sort, term });
-    const all = favoritesOnly ? projectsApi.list() : filtered;
+  const {
+    projects,
+    total,
+    isFirstLoad,
+    isLoading,
+    loadError,
+    reload,
+    toggleFavorite,
+    removeProject,
+  } = useProjects({ favoritesOnly, sort, term });
 
-    Promise.all([filtered, all]).then(([filteredResult, allResult]) => {
-      setProjectList(filteredResult.projects);
-      setTotalCount(allResult.total);
-    });
-  }, [favoritesOnly, sort, term]);
-
-  const isEmpty = !favoritesOnly && !term && projectList.length === 0;
+  const isEmpty =
+    !isLoading &&
+    !loadError &&
+    !favoritesOnly &&
+    !term &&
+    projects.length === 0;
   const isSearchResult = Boolean(term);
 
-  const handleToggleFavorites = () => {
+  const updateParam = (key: string, value: string | null) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      next.set("favorites_only", String(!favoritesOnly));
+      if (value) next.set(key, value);
+      else next.delete(key);
       return next;
     });
   };
 
-  const handleToggleFavorite = (project: Project) => {
-    projectsApi.setFavorite(project.id, !project.isFavorite);
-    setProjectList((prev) =>
-      prev.map((p) =>
-        p.id === project.id ? { ...p, isFavorite: !p.isFavorite } : p,
-      ),
-    );
+  const handleOpenDelete = (project: Project) => {
+    setDeleteError(null);
+    setProjectToDelete(project);
   };
 
-  const handleOrderBy = (option: keyof ProjectInput) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set("sort_by", option);
-      return next;
-    });
-    setOpenedFilter(false);
+  const handleCancelDelete = () => {
+    setDeleteError(null);
+    setProjectToDelete(null);
   };
 
   const handleConfirmDelete = async () => {
     if (!projectToDelete) return;
     setIsDeleting(true);
+    setDeleteError(null);
     try {
-      await projectsApi.delete(projectToDelete.id);
-      setProjectList((prev) => prev.filter((p) => p.id !== projectToDelete.id));
-      setTotalCount((prev) => prev - 1);
+      await removeProject(projectToDelete.id);
       setProjectToDelete(null);
-    } catch {
+    } catch (err) {
+      setDeleteError(
+        err instanceof ApiError && err.status === 404
+          ? "Este projeto não existe mais. Atualize a página."
+          : "Não foi possível remover o projeto. Tente novamente.",
+      );
     } finally {
       setIsDeleting(false);
     }
   };
 
-  return isEmpty ? (
-    <ProjectEmpty />
-  ) : (
+  if (isEmpty) return <ProjectEmpty />;
+
+  return (
     <div className="project-list-container">
       {isSearchResult ? (
         <>
@@ -100,57 +101,20 @@ export const ProjectList = () => {
         <div className="page-header">
           <h1 className="page-title">
             Projetos
-            <span className="page-title-count">({totalCount})</span>
+            <span className="page-title-count">({total})</span>
           </h1>
           <div className="project-list-actions">
-            <label className="switch">
-              <input
-                type="checkbox"
-                role="switch"
-                checked={favoritesOnly}
-                onChange={() => handleToggleFavorites()}
-              />
-              <span className="switch-slider" aria-hidden="true" />
-              Apenas favoritos
-            </label>
-            <div className="project-list-filter">
-              <div
-                className={
-                  "project-list-filter-container" +
-                  (openedFilter ? " opened" : "")
-                }
-              >
-                <button
-                  className="project-list-filter-button"
-                  onClick={() => setOpenedFilter(!openedFilter)}
-                >
-                  {sortOptions[sort]}
-                  {
-                    <Icon
-                      icon={openedFilter ? "chevron-up" : "chevron-down"}
-                      color="textMuted"
-                      size={20}
-                    />
-                  }
-                </button>
-                {openedFilter && (
-                  <ul className="project-list-options">
-                    {Object.keys(sortOptions).map((option, index) => (
-                      <li key={index} className="project-list-option">
-                        <button
-                          className="project-list-options-button"
-                          onClick={() =>
-                            handleOrderBy(option as keyof ProjectInput)
-                          }
-                        >
-                          {sortOptions[option as keyof ProjectInput]}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
+            <Switch
+              label="Apenas favoritos"
+              checked={favoritesOnly}
+              onChange={(checked) =>
+                updateParam("favorites_only", checked ? "true" : null)
+              }
+            />
+            <SortSelect
+              value={sort}
+              onChange={(option) => updateParam("sort_by", option)}
+            />
             <Button
               isLink
               to="/projects/new"
@@ -161,17 +125,41 @@ export const ProjectList = () => {
           </div>
         </div>
       )}
-      <div className="project-list">
-        {projectList.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            term={term}
-            onFavorite={handleToggleFavorite}
-            onDelete={setProjectToDelete}
-          />
-        ))}
-      </div>
+      {loadError && !isLoading ? (
+        <div className="page-state" role="alert">
+          <p className="page-state-message">
+            Não foi possível carregar os projetos.
+          </p>
+          <Button variant="secondary" onClick={reload}>
+            Tentar novamente
+          </Button>
+        </div>
+      ) : isFirstLoad ? (
+        <div className="page-state" role="status">
+          <p className="page-state-message">Carregando projetos...</p>
+        </div>
+      ) : !isLoading && projects.length === 0 ? (
+        <div className="page-state" role="status">
+          <p className="page-state-message">Nenhum projeto encontrado.</p>
+        </div>
+      ) : (
+        <div
+          className={
+            "project-list" + (isLoading ? " project-list--loading" : "")
+          }
+          aria-busy={isLoading}
+        >
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              term={term}
+              onFavorite={toggleFavorite}
+              onDelete={handleOpenDelete}
+            />
+          ))}
+        </div>
+      )}
       <ConfirmDialog
         open={projectToDelete !== null}
         title="Remover projeto"
@@ -182,10 +170,10 @@ export const ProjectList = () => {
           </span>
         }
         icon="trash"
-        confirmLabel="Remover"
         isLoading={isDeleting}
+        error={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setProjectToDelete(null)}
+        onCancel={handleCancelDelete}
       />
     </div>
   );

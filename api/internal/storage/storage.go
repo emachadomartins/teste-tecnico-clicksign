@@ -13,11 +13,15 @@ import (
 	"path/filepath"
 )
 
+var ErrInvalidContentType = errors.New("invalid content type")
+
 type Storage interface {
 	Save(ctx context.Context, name string, content io.Reader) (string, error)
-	Read(ctx context.Context, path string) (io.ReadCloser, error)
+	Read(ctx context.Context, path string) (io.ReadCloser, string, error)
 	Delete(ctx context.Context, path string) error
 }
+
+var _ Storage = (*LocalStorage)(nil)
 
 type LocalStorage struct {
 	basePath            string
@@ -58,7 +62,7 @@ func (s *LocalStorage) Save(ctx context.Context, name string, content io.Reader)
 	}
 
 	if !allowed {
-		return "", fmt.Errorf("invalid content type: %s", contentType)
+		return "", fmt.Errorf("%w: %s", ErrInvalidContentType, contentType)
 	}
 
 	fileName := name + utils.DetectFileExtension(contentType)

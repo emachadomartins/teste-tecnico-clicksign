@@ -1,4 +1,4 @@
-import type { ProjectInput } from "../types/project";
+import type { ProjectInput } from "@/types";
 
 export function validate(
   form: ProjectInput,

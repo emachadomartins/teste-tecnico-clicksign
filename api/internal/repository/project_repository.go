@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"gerenciador-de-projetos-back/internal/model"
 
 	"github.com/google/uuid"
@@ -56,7 +56,13 @@ func (r *ProjectRepository) FindAll(ctx context.Context, filter model.ProjectQue
 func (r *ProjectRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.ProjectModel, error) {
 	var project model.ProjectModel
 	err := r.db.WithContext(ctx).First(&project, "id = ?", id).Error
-	return &project, err
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, model.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &project, nil
 }
 
 func (r *ProjectRepository) Update(ctx context.Context, p *model.ProjectModel) error {
@@ -76,7 +82,7 @@ func (r *ProjectRepository) SetFavorite(ctx context.Context, id uuid.UUID, isFav
 		return res.Error
 	}
 	if res.RowsAffected == 0 {
-		return fmt.Errorf("Project not found: %s", id)
+		return model.ErrNotFound
 	}
 	return nil
 }

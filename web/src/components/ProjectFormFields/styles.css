@@ -1,0 +1,23 @@
+.project-form {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.form-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.project-form-submit {
+  width: 100%;
+
+  margin-top: 24px;
+}
+
+.form-submit-error {
+  color: var(--color-danger);
+  text-align: center;
+  margin-top: 8px;
+}

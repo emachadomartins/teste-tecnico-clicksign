@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import App from "./App";
-import { ProjectForm } from "./pages/ProjectForm";
-import { ProjectList } from "./pages/ProjectList";
+import { ProjectForm, ProjectList } from "@/pages";
 
 export const router = createBrowserRouter([
   {

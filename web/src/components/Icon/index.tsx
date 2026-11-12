@@ -22,7 +22,7 @@ import {
   type LucideProps,
 } from "lucide-react";
 
-import { colors, type ColorName } from "../../theme";
+import { colors, type ColorName } from "@/theme";
 import "./styles.css";
 
 const icons = {

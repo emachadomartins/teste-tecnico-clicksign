@@ -6,23 +6,24 @@ Este documento registra as principais decisões tomadas no projeto: o contexto d
 
 ## Sumário
 
-| Área | Decisão |
-|---|---|
-| [API](#api) | Go com chi, camadas handler → service → repository |
-| [Banco de dados](#banco-de-dados) | PostgreSQL com GORM e `AutoMigrate` |
-| [Modelo de dados](#modelo-de-dados) | UUID gerado pela aplicação e um tipo próprio para datas |
-| [Contrato da API](#contrato-da-api) | Envelope `{ data, metadata, error }` e campos em snake_case |
-| [Atualização e favoritos](#atualização-e-favoritos) | `PUT` parcial e uma rota própria, idempotente, para favoritar |
-| [Busca, filtro e ordenação](#busca-filtro-e-ordenação) | Feitos na API, palavra por palavra, sem diferenciar maiúsculas nem acentos |
-| [Capas dos projetos](#capas-dos-projetos) | Disco local atrás de uma interface, enviadas numa segunda requisição |
-| [Front-end](#front-end) | React com Vite, React Router e TypeScript |
-| [Estado da listagem](#estado-da-listagem) | Filtros guardados na URL |
-| [Comunicação com a API](#comunicação-com-a-api) | Uma camada própria sobre o `fetch`, sem biblioteca de cache |
-| [Estado nos componentes](#estado-nos-componentes) | Valores derivados em vez de estados sincronizados |
-| [Componentes](#componentes) | Componentes próprios, incluindo o `<dialog>` nativo e um select feito à mão |
-| [Estilos](#estilos) | CSS puro por componente, com as cores em variáveis |
-| [Testes](#testes) | Testes unitários de funções puras, nos dois lados |
-| [Ambiente e deploy](#ambiente-e-deploy) | Docker Compose, com o nginx servindo o front e repassando a API |
+| Área                                                   | Decisão                                                                     |
+| ------------------------------------------------------ | --------------------------------------------------------------------------- |
+| [API](#api)                                            | Go com chi, camadas handler → service → repository                          |
+| [Banco de dados](#banco-de-dados)                      | PostgreSQL com GORM e `AutoMigrate`                                         |
+| [Modelo de dados](#modelo-de-dados)                    | UUID gerado pela aplicação e um tipo próprio para datas                     |
+| [Contrato da API](#contrato-da-api)                    | Envelope `{ data, metadata, error }` e campos em snake_case                 |
+| [Atualização e favoritos](#atualização-e-favoritos)    | `PUT` parcial e uma rota própria, idempotente, para favoritar               |
+| [Busca, filtro e ordenação](#busca-filtro-e-ordenação) | Feitos na API, palavra por palavra, sem diferenciar maiúsculas nem acentos  |
+| [Capas dos projetos](#capas-dos-projetos)              | Disco local atrás de uma interface, enviadas numa segunda requisição        |
+| [Front-end](#front-end)                                | React com Vite, React Router e TypeScript                                   |
+| [Estado da listagem](#estado-da-listagem)              | Filtros guardados na URL                                                    |
+| [Comunicação com a API](#comunicação-com-a-api)        | Uma camada própria sobre o `fetch`, sem biblioteca de cache                 |
+| [Estado nos componentes](#estado-nos-componentes)      | Valores derivados em vez de estados sincronizados                           |
+| [Componentes](#componentes)                            | Componentes próprios, incluindo o `<dialog>` nativo e um select feito à mão |
+| [Estilos](#estilos)                                    | CSS puro por componente, com as cores em variáveis                          |
+| [Testes](#testes)                                      | Testes unitários de funções puras, nos dois lados                           |
+| [Organização do código](#organização-do-código)        | Dependências montadas num lugar só, hooks para os dados e imports com `@/`  |
+| [Ambiente e deploy](#ambiente-e-deploy)                | Docker Compose, com o nginx servindo o front e repassando a API             |
 
 ---
 
@@ -35,6 +36,7 @@ Este documento registra as principais decisões tomadas no projeto: o contexto d
 **Por quê:** o chi é compatível com o `net/http` da biblioteca padrão. Os handlers são `http.HandlerFunc` comuns, e o chi acrescenta só o que a biblioteca padrão não tem pronto: agrupamento de rotas (`Mount`) e middlewares, como o de CORS. O código continua sendo Go idiomático, sem depender de um contexto próprio do framework.
 
 **Alternativas consideradas:**
+
 - **Só a biblioteca padrão:** desde o Go 1.22, o `net/http` aceita método e parâmetro na rota. Seria suficiente para o número de rotas, mas exigiria escrever à mão o agrupamento e os middlewares.
 - **Gin e Echo:** mais populares e com binding e validação por tags, mas com um contexto próprio (`gin.Context`, `echo.Context`), que acopla todo o código ao framework.
 - **Fiber:** baseado no `fasthttp`, não é compatível com o ecossistema do `net/http`, e a diferença de desempenho não faz sentido para um CRUD.
@@ -60,6 +62,7 @@ O `context` de cada requisição é repassado do handler até o GORM. Se o clien
 **Por quê:** o GORM monta as queries a partir das structs, faz o mapeamento das linhas e cria a tabela. As queries dinâmicas da listagem (busca, filtro e ordenação opcionais) são montadas encadeando `Where` e `Order`, o que fica mais legível do que concatenar SQL à mão.
 
 **Alternativas consideradas:**
+
 - **pgx puro:** o driver mais completo para Postgres em Go, com SQL escrito à mão. Mais explícito e com menos "mágica", mas com mais código repetido para o mapeamento.
 - **sqlc:** gera código Go tipado a partir de SQL. Excelente para queries fixas, mas desconfortável para a query dinâmica da listagem.
 
@@ -100,6 +103,14 @@ O `context` de cada requisição é repassado do handler até o GORM. Se o clien
 **Decisão:** as respostas seguem o formato `{ data, metadata, error }`.
 
 **Por quê:** o front lê toda resposta do mesmo jeito: o resultado em `data`, o total em `metadata` (na listagem) e a mensagem em `error` (nos erros). Isso permite que um único ponto do front (`api/client.ts`) trate todas as respostas.
+
+### Erros com significado, traduzidos num lugar só
+
+**Decisão:** as camadas devolvem erros que dizem o que aconteceu (`ErrNotFound`, `ErrNoCover`, `ValidationError`, `ErrInvalidContentType`), e uma única função do handler traduz cada um para o status HTTP (400, 404, 413 ou 500).
+
+**Por quê:** o service não sabe nada de HTTP, e o status de cada situação é decidido num só lugar, igual em todas as rotas. Um erro de validação sempre vira 400, e um projeto inexistente sempre vira 404.
+
+Os erros 500 respondem só com `internal server error`, e o detalhe vai para o log. Assim, mensagens internas, como as do banco, não chegam a quem chama a API.
 
 ### Campos em snake_case
 
@@ -148,6 +159,7 @@ O `sort_by` recebido é convertido para uma das ordenações conhecidas, e o val
 **Decisão:** o termo é dividido em palavras, e cada palavra precisa aparecer no nome **ou** no cliente do projeto. A comparação ignora maiúsculas e acentos.
 
 **Por quê:**
+
 - **Palavra por palavra:** "projeto exemplo" encontra "Décimo Projeto de Exemplo", mesmo com outras palavras no meio e em outra ordem.
 - **Nome ou cliente:** cada palavra pode estar em qualquer um dos dois, então "etanol acme" encontra o projeto "Etanol" do cliente "Acme".
 - **Sem acentos:** "cachaca" encontra "Cachaça".
@@ -166,9 +178,12 @@ A normalização é aplicada aos **dois lados** da comparação: ao termo, no Go
 
 **Decisão:** as imagens são salvas em disco, por um `LocalStorage` que implementa uma interface `Storage` (`Save`, `Read` e `Delete`).
 
-**Por quê:** é a opção mais simples para o escopo, sem depender de um serviço externo. A interface isola o resto do código desse detalhe.
+**Por quê:** é a opção mais simples para o escopo, sem depender de um serviço externo. A interface isola o resto do código desse detalhe: o service recebe um `storage.Storage`, e não o `LocalStorage`.
+
+A linha `var _ Storage = (*LocalStorage)(nil)` faz o compilador conferir que o `LocalStorage` implementa a interface. Sem ela, uma assinatura diferente só seria percebida no ponto em que o `LocalStorage` fosse passado como `Storage`.
 
 **Alternativas consideradas:**
+
 - **Imagem em base64 no banco:** dispensa infraestrutura, mas aumenta o tamanho do banco e das respostas em cerca de 33%, e cada listagem carregaria as imagens inteiras.
 - **Storage externo (S3, Cloudflare R2):** é o caminho certo para produção, porque sobrevive a novos deploys. Graças à interface, ele pode ser implementado como um `S3Storage`, sem mudar o service.
 
@@ -194,6 +209,7 @@ Para detectar o tipo, o storage lê os primeiros 512 bytes. Esses bytes são dev
 **Por quê:** as rotas de criação e edição continuam em JSON, com a validação de tipos que o JSON oferece, e a lógica de arquivos fica isolada numa rota própria.
 
 **Alternativas consideradas:**
+
 - **Uma requisição só, com `multipart/form-data`:** é atômica, mas faria a criação e a edição deixarem de aceitar JSON.
 - **Upload antecipado, ao escolher a imagem:** comum com storage externo, mas deixa arquivos órfãos quando a pessoa desiste do formulário.
 
@@ -205,7 +221,9 @@ Para detectar o tipo, o storage lê os primeiros 512 bytes. Esses bytes são dev
 
 **Por quê:** a URL não depende de onde ou como o arquivo está guardado. Trocar o disco por um storage externo não muda a URL.
 
-Como a URL é a mesma para um projeto mesmo depois de trocar a capa, o front acrescenta o nome do arquivo como versão (`?v=<cover_url>`). Quando a capa muda, a URL muda, e o navegador baixa a imagem nova em vez de reaproveitar a antiga do cache.
+Como a URL é a mesma para um projeto mesmo depois de trocar a capa, o front acrescenta a data de atualização do projeto como versão (`?v=<updated_at>`). Trocar a capa atualiza o projeto, a URL muda, e o navegador baixa a imagem nova em vez de reaproveitar a antiga do cache.
+
+**Custo:** a URL também muda quando outros dados do projeto são editados, como o nome, e a imagem é baixada de novo mesmo sem ter mudado. A alternativa seria gerar um nome de arquivo novo a cada upload e usar esse nome como versão: a URL só mudaria quando a imagem mudasse, mas o back precisaria apagar o arquivo anterior a cada troca.
 
 ---
 
@@ -230,6 +248,7 @@ A criação e a edição usam **a mesma página**, `ProjectForm`, que decide o m
 **Decisão:** a busca, o filtro de favoritos e a ordenação ficam na query string (`/?term=...&favorites_only=true&sort_by=final_date`), com o `useSearchParams`, e não em estados do React.
 
 **Por quê:**
+
 - **A busca fica na top-bar, e a listagem fica em outra página.** A top-bar escreve o termo na URL e a listagem lê da URL, sem que um componente precise conhecer o outro.
 - **Os filtros sobrevivem a um recarregamento** da página e funcionam com o botão "voltar" do navegador.
 - **A lista filtrada pode ser compartilhada** por link.
@@ -280,13 +299,14 @@ Exemplos: a lista está vazia (`isEmpty`), os erros do formulário (`errors`), o
 
 ## Componentes
 
-| Componente | Decisão | Por quê |
-|---|---|---|
-| `ConfirmDialog` | Usa o elemento nativo `<dialog>`, aberto com `showModal()` | O navegador já cuida do fundo escurecido, de colocar o modal acima de todo o resto, de prender o foco dentro dele e de fechar com Esc |
-| Seletor de ordenação | Um componente feito à mão, e não um `<select>` | O `<select>` nativo não permite estilizar as opções de forma consistente entre navegadores, nem girar a seta quando a lista abre |
-| `Button` | Variantes `primary` e `secondary`, e um modo `isLink`, que gera um link com a mesma aparência | Os botões ficam iguais em todo o app, e o que navega continua sendo um link de verdade, que abre em nova aba |
-| `Icon` | Um mapa com os ícones usados, acessados pelo nome (`<Icon icon="trash" />`) | Só os ícones do mapa entram no bundle, e o nome é verificado pelo TypeScript. Quando o ícone é clicável, o `label` é obrigatório, porque um botão só com ícone precisa de um texto para leitores de tela |
-| `FormInput` | Aceita todos os atributos de um `<input>` nativo, além do `label` e do `error` | Novos atributos (`min`, `max`, `onBlur`) funcionam sem mudar o componente |
+| Componente      | Decisão                                                                                       | Por quê                                                                                                                                                                                                  |
+| --------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ConfirmDialog` | Usa o elemento nativo `<dialog>`, aberto com `showModal()`                                    | O navegador já cuida do fundo escurecido, de colocar o modal acima de todo o resto, de prender o foco dentro dele e de fechar com Esc                                                                    |
+| `SortSelect`    | Um componente feito à mão, e não um `<select>`                                                | O `<select>` nativo não permite estilizar as opções de forma consistente entre navegadores, nem girar a seta quando a lista abre                                                                         |
+| `CoverField`    | O campo de capa como um componente, com a prévia, a validação do arquivo e o botão de remover | A lógica da prévia (`URL.createObjectURL`, liberada ao trocar de imagem) fica isolada, e o formulário só recebe o arquivo escolhido ou o aviso de que a capa atual foi removida                          |
+| `Button`        | Variantes `primary` e `secondary`, e um modo `isLink`, que gera um link com a mesma aparência | Os botões ficam iguais em todo o app, e o que navega continua sendo um link de verdade, que abre em nova aba                                                                                             |
+| `Icon`          | Um mapa com os ícones usados, acessados pelo nome (`<Icon icon="trash" />`)                   | Só os ícones do mapa entram no bundle, e o nome é verificado pelo TypeScript. Quando o ícone é clicável, o `label` é obrigatório, porque um botão só com ícone precisa de um texto para leitores de tela |
+| `FormInput`     | Aceita todos os atributos de um `<input>` nativo, além do `label` e do `error`                | Novos atributos (`min`, `max`, `onBlur`) funcionam sem mudar o componente                                                                                                                                |
 
 ### Elementos que navegam são links
 
@@ -335,6 +355,64 @@ A fonte do design vem do pacote `@fontsource`, e é servida pelo próprio app, s
 Os testes também protegem contra a volta de bugs já encontrados: o arquivo de capa gravado sem os primeiros 512 bytes, a extensão `.jfif` e a data exibida com um dia a menos.
 
 **Próximo passo:** testes de integração dos handlers (com um banco de teste) e testes de componentes no front.
+
+---
+
+## Organização do código
+
+Antes da entrega, o código passou por uma revisão com um critério principal: cada arquivo deve ter uma responsabilidade clara, e o código deve fazer o que esta documentação diz. As decisões abaixo saíram dessa revisão.
+
+### Dependências montadas num lugar só
+
+**Decisão:** o `router` cria o storage, o repository, o service e o handler, e passa cada um pronto para o próximo. Cada camada recebe as suas dependências no construtor (`NewProjectService(logger, repo, storage)`, `NewProjectHandler(service)`), em vez de criá-las por dentro.
+
+**Por quê:** as dependências de cada camada ficam visíveis na assinatura do construtor, e trocar uma delas (um storage externo, um service falso num teste) é mudar uma linha no `router`. Antes, o handler criava o próprio service, e esse acoplamento só aparecia lendo a implementação.
+
+### Páginas que só compõem
+
+**Decisão:** as páginas não buscam dados diretamente. O carregamento fica em hooks (`useProjects` para a listagem e `useProject` para a edição), e as partes com lógica própria viraram componentes (`Switch`, `SortSelect`, `CoverField` e `ProjectFormFields`).
+
+**Por quê:** a `ProjectList` e a `ProjectForm` tinham perto de 300 linhas cada, misturando carregamento, cancelamento de requisições, favoritar, remoção, o seletor de ordenação, a prévia da capa e o envio do formulário. Hoje, cada página monta as peças e cuida só do que é dela (o modal de remoção, os estados de carregamento e erro), e cada peça pode ser lida sozinha.
+
+### O formulário nasce com os dados
+
+**Decisão:** a `ProjectForm` carrega o projeto e só então renderiza o `ProjectFormFields`, com `key={id}`. O estado do formulário é criado já preenchido com os dados do projeto.
+
+**Por quê:** a alternativa seria criar o formulário vazio e copiar os dados com um `useEffect` quando o projeto chegasse, o que é justamente o tipo de estado sincronizado à mão evitado no resto do app (ver [Estado nos componentes](#estado-nos-componentes)). A `key` faz o React recriar o formulário do zero ao trocar de projeto, sem resto do estado anterior.
+
+### Tipos que dizem o que aceitam
+
+**Decisão:** a ordenação tem um tipo próprio, `SortOption`, derivado da lista `SORT_OPTIONS` (`"name" | "initial_date" | "final_date"`), com a função `isSortOption` para validar o valor lido da URL.
+
+**Por quê:** antes, a ordenação usava `keyof ProjectInput`, que funcionava porque os nomes coincidiam, mas dizia que qualquer campo do formulário (como `client`) era uma ordenação válida. Com o tipo próprio, o TypeScript recusa valores que a API não aceita, e o seletor e a validação usam a mesma lista.
+
+### Imports com `@/`
+
+**Decisão:** o alias `@/` aponta para `src/`, e cada pasta (`api`, `components`, `hooks`, `pages`, `types` e `utils`) tem um `index.ts` que reexporta o seu conteúdo:
+
+```ts
+import { ApiError, projectsApi } from "@/api";
+import { Button, Icon } from "@/components";
+```
+
+Dentro de uma mesma pasta, os arquivos se importam pelo caminho relativo (`../Button`).
+
+**Por quê:** os imports ficam curtos e não mudam quando um arquivo muda de pasta. A regra do caminho relativo evita imports circulares: se um componente importasse o `index.ts` da própria pasta, ele importaria a si mesmo de volta, e outro componente poderia chegar `undefined`, dependendo da ordem de carregamento.
+
+**Custo:** o alias precisa ser configurado em dois lugares, no `tsconfig.app.json` (para o TypeScript) e no `vite.config.ts` (para o Vite e o Vitest).
+
+### Sem sobras
+
+Código sem uso foi removido, porque ele faz quem lê procurar um comportamento que não existe:
+
+- o campo `Page` da resposta da listagem, que nunca era preenchido, porque não há paginação;
+- a prop `confirmLabel` do `ConfirmDialog`, que o componente ignorava;
+- os comentários que só repetiam o que o código já dizia;
+- as classes CSS que nenhum componente usava.
+
+### Lint e formatação
+
+O `make lint` roda o `gofmt` e o `go vet` na API, e o [oxlint](https://oxc.rs) e o [Prettier](https://prettier.io) no front. O `make format` aplica a formatação nos dois. Assim, a formatação nunca é assunto de revisão, e o lint pega problemas como um `setState` dentro de um efeito.
 
 ---
 

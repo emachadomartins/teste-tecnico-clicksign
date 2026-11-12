@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ProjectInput } from "../types/project";
+import type { ProjectInput } from "@/types";
 import { validate } from "./projectForm";
 
 const today = "2026-11-12";
@@ -36,9 +36,7 @@ describe("validate", () => {
   });
 
   it("recusa a data de início no passado ao criar", () => {
-    expect(errorKeys({ initial_date: "2026-11-01" })).toEqual([
-      "initial_date",
-    ]);
+    expect(errorKeys({ initial_date: "2026-11-01" })).toEqual(["initial_date"]);
   });
 
   it("aceita a data de início no passado ao editar", () => {

@@ -19,10 +19,19 @@ export type ProjectInput = {
 export type ApiProject = ProjectInput & {
   id: string;
   is_favorite: boolean;
+  updated_at: string;
 };
+
+export const SORT_OPTIONS = ["name", "initial_date", "final_date"] as const;
+
+export type SortOption = (typeof SORT_OPTIONS)[number];
+
+export function isSortOption(value: string | null): value is SortOption {
+  return SORT_OPTIONS.includes(value as SortOption);
+}
 
 export type ProjectQuery = {
   term?: string;
   favoritesOnly?: boolean;
-  sort?: keyof ApiProject;
+  sort?: SortOption;
 };

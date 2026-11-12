@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"gerenciador-de-projetos-back/internal/model"
 	"gerenciador-de-projetos-back/internal/repository"
 	"gerenciador-de-projetos-back/internal/storage"
 	"gerenciador-de-projetos-back/internal/utils"
 	"io"
+	"io/fs"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,10 +17,10 @@ import (
 type ProjectService struct {
 	repository *repository.ProjectRepository
 	logger     *utils.LoggerImpl
-	storage    *storage.LocalStorage
+	storage    storage.Storage
 }
 
-func NewProjectService(l *utils.LoggerImpl, r *repository.ProjectRepository, s *storage.LocalStorage) *ProjectService {
+func NewProjectService(l *utils.LoggerImpl, r *repository.ProjectRepository, s storage.Storage) *ProjectService {
 	return &ProjectService{
 		repository: r,
 		logger:     l,
@@ -36,6 +37,10 @@ func (s *ProjectService) List(ctx context.Context, filter model.ProjectFilter) (
 }
 
 func (s *ProjectService) Create(ctx context.Context, p model.ProjectPayload) (*model.ProjectModel, error) {
+	if err := p.RequiredFieldsError(); err != nil {
+		return nil, err
+	}
+
 	project := &model.ProjectModel{
 		BaseModel:   model.NewBaseModel(),
 		Name:        *p.Name,
@@ -70,10 +75,6 @@ func (s *ProjectService) Update(ctx context.Context, id uuid.UUID, p model.Proje
 
 	if err != nil {
 		return nil, err
-	}
-
-	if project == nil {
-		return nil, fmt.Errorf("Project not found: %s", id)
 	}
 
 	if p.Name != nil {
@@ -114,16 +115,13 @@ func (s *ProjectService) Delete(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 
-	if project == nil {
-		return fmt.Errorf("Project not found: %s", id)
-	}
 	if err := s.repository.Delete(ctx, id); err != nil {
 		return err
 	}
 
 	if project.CoverURL != nil {
 		if err := s.storage.Delete(ctx, *project.CoverURL); err != nil {
-			return err
+			s.logger.Error("failed to delete cover %s: %s", *project.CoverURL, err)
 		}
 	}
 
@@ -141,10 +139,6 @@ func (s *ProjectService) UploadCoverImage(ctx context.Context, id uuid.UUID, con
 	project, err := s.repository.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
-	}
-
-	if project == nil {
-		return nil, fmt.Errorf("Project not found: %s", id)
 	}
 
 	coverImagePath, err := s.storage.Save(ctx, project.ID.String(), content)
@@ -169,12 +163,8 @@ func (s *ProjectService) GetCoverImage(ctx context.Context, id uuid.UUID) (io.Re
 		return nil, "", err
 	}
 
-	if project == nil {
-		return nil, "", fmt.Errorf("Project not found: %s", id)
-	}
-
 	if project.CoverURL == nil {
-		return nil, "", fmt.Errorf("Cover image not found for project: %s", id)
+		return nil, "", model.ErrNoCover
 	}
 
 	return s.storage.Read(ctx, *project.CoverURL)
@@ -186,16 +176,12 @@ func (s *ProjectService) DeleteCoverImage(ctx context.Context, id uuid.UUID) err
 		return err
 	}
 
-	if project == nil {
-		return fmt.Errorf("Project not found: %s", id)
-	}
-
 	if project.CoverURL == nil {
-		return fmt.Errorf("Cover image not found for project: %s", id)
+		return model.ErrNoCover
 	}
 
 	err = s.storage.Delete(ctx, *project.CoverURL)
-	if err != nil {
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 

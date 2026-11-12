@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
-import type { Project } from "../../types/project";
-import { formatLongDate } from "../../utils/date";
-import { highlightTerm } from "../../utils/string";
+import type { Project } from "@/types";
+import { formatLongDate, highlightTerm } from "@/utils";
 import { Icon } from "../Icon";
 import "./styles.css";
 

@@ -1,5 +1,5 @@
-import logo from "../../assets/logo.svg";
-import { useSearchHistory } from "../../hooks/useSearchHistory";
+import logo from "@/assets/logo.svg";
+import { MIN_SEARCH_LENGTH, useSearchHistory } from "@/hooks";
 
 import React, { useState } from "react";
 import { useSearchParams } from "react-router";
@@ -14,8 +14,9 @@ export const Topbar: React.FC<TopbarProps> = ({
   hasSearchButton = true,
 }: TopbarProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isSearchActive, setIsSearchActive] = React.useState(false);
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const [search, setSearch] = useState("");
+  const [showSearchHint, setShowSearchHint] = useState(false);
   const { addSearch, removeSearch, history } = useSearchHistory();
 
   const term = searchParams.get("term") || undefined;
@@ -37,17 +38,25 @@ export const Topbar: React.FC<TopbarProps> = ({
     if (!e.currentTarget.contains(e.relatedTarget)) setIsSearchActive(false);
   };
 
-  const handleSearch = (term: string) => {
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim();
+
+    if (trimmed && trimmed.length < MIN_SEARCH_LENGTH) {
+      setShowSearchHint(true);
+      return;
+    }
+
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       next.delete("favorites_only");
       next.delete("sort_by");
-      if (term) next.set("term", term);
+      if (trimmed) next.set("term", trimmed);
       else next.delete("term");
       return next;
     });
-    addSearch(term);
+    addSearch(trimmed);
     setSearch("");
+    setShowSearchHint(false);
     setIsSearchActive(false);
   };
 
@@ -81,7 +90,10 @@ export const Topbar: React.FC<TopbarProps> = ({
               aria-label="Buscar projetos"
               value={isSearchActive ? search : (term ?? "")}
               onFocus={handleSearchFocus}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setShowSearchHint(false);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSearch(search);
                 if (e.key === "Escape") {
@@ -92,6 +104,11 @@ export const Topbar: React.FC<TopbarProps> = ({
               autoFocus={isSearchActive}
             />
           </div>
+          {isSearchActive && showSearchHint && (
+            <p className="search-hint" role="status">
+              Digite ao menos {MIN_SEARCH_LENGTH} caracteres para buscar.
+            </p>
+          )}
           {isSearchActive && history.length > 0 && (
             <ul className="search-history">
               {history.map((term) => (

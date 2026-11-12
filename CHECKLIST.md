@@ -12,7 +12,7 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 - [x] Criar estrutura de pastas do projeto do backend (Go)
 - [x] Criar estrutura de pstas do projeto do frontend (React)
 - [x] Configurar banco de dados
-- [ ] Configurar lint/formatter
+- [x] Configurar lint/formatter
 - [x] Configurar variáveis de ambiente (`.env.example`)
 
 ## 🔌 API
@@ -24,8 +24,8 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 - [x] `[DELETE] /projects/:id` — remover projeto
 - [x] `[PATCH] /projects/:id/favorite` — favoritar/desfavoritar
 - [x] Suporte a busca, filtro de favoritos e ordenação (query params)
-- [ ] Validação dos dados de entrada
-- [ ] Tratamento de erros padronizado
+- [x] Validação dos dados de entrada
+- [x] Tratamento de erros padronizado
 
 ## 📋 Listagem
 
@@ -56,7 +56,7 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 ## 🔍 Busca
 
 - [x] Barra de busca
-- [ ] Disparar busca somente com no mínimo 3 caracteres
+- [x] Disparar busca somente com no mínimo 3 caracteres
 - [x] Histórico das últimas 5 buscas
 - [x] Highlight do termo buscado nos resultados
 
@@ -65,13 +65,13 @@ Gerenciador de projetos: visualizar, adicionar, editar, remover e favoritar proj
 - [x] Cores, tipografia e espaçamentos conforme o Figma
 - [x] Ícones e assets exportados do Figma
 - [x] Responsividade (se prevista no design)
-- [ ] Estados de loading e erro
+- [x] Estados de loading e erro
 
 ## 🧪 Qualidade
 
 - [x] Testes da API
 - [x] Testes do front-end
-- [ ] Código organizado e legível
+- [x] Código organizado e legível
 
 ## 📚 Documentação
 

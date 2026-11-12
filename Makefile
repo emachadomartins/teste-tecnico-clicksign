@@ -1,4 +1,4 @@
-.PHONY: dev db api web stop test
+.PHONY: dev db api web stop test lint format
 
 ## Sobe o banco e roda API + front em modo de desenvolvimento
 dev: db
@@ -29,3 +29,11 @@ test-api:
 ## Testes do front
 test-web:
 	cd web && npm test
+
+lint:
+	cd api && test -z "$$(gofmt -l .)" && go vet ./...
+	cd web && npm run lint && npm run format:check
+
+format:
+	cd api && gofmt -w .
+	cd web && npm run format

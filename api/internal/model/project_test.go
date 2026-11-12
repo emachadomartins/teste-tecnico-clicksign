@@ -1,6 +1,9 @@
 package model
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func validProject(t *testing.T) ProjectModel {
 	t.Helper()
@@ -42,8 +45,48 @@ func TestProjectModelValidate(t *testing.T) {
 			if !tt.wantErr && err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
+
+			var validationErr *ValidationError
+			if tt.wantErr && !errors.As(err, &validationErr) {
+				t.Errorf("expected a *ValidationError, got %T", err)
+			}
 		})
 	}
+}
+
+func TestProjectPayloadRequiredFieldsError(t *testing.T) {
+	name, client := "Projeto", "Cliente"
+	initial, final := mustDate(t, "2026-11-10"), mustDate(t, "2026-11-30")
+
+	t.Run("todos os campos enviados", func(t *testing.T) {
+		p := ProjectPayload{Name: &name, Client: &client, InitialDate: &initial, FinalDate: &final}
+		if err := p.RequiredFieldsError(); err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("lista os campos ausentes", func(t *testing.T) {
+		p := ProjectPayload{Name: &name, FinalDate: &final}
+
+		err := p.RequiredFieldsError()
+
+		var validationErr *ValidationError
+		if !errors.As(err, &validationErr) {
+			t.Fatalf("expected a *ValidationError, got %v", err)
+		}
+		want := "missing required fields: client, initial_date"
+		if validationErr.Message != want {
+			t.Errorf("message = %q, want %q", validationErr.Message, want)
+		}
+	})
+
+	t.Run("payload vazio", func(t *testing.T) {
+		err := ProjectPayload{}.RequiredFieldsError()
+		want := "missing required fields: name, client, initial_date, final_date"
+		if err == nil || err.Error() != want {
+			t.Errorf("got %v, want %q", err, want)
+		}
+	})
 }
 
 func TestSortBy(t *testing.T) {

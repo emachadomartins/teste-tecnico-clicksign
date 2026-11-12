@@ -1,5 +1,5 @@
 import { Outlet, useMatch } from "react-router";
-import { Topbar } from "./components/Topbar";
+import { Topbar } from "@/components";
 
 import "./App.css";
 

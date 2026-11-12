@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"gerenciador-de-projetos-back/internal/utils"
 	"net/http"
 
@@ -10,9 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
+var errInvalidID = errors.New("invalid project id")
+
 type ResultMetadata struct {
 	Total int `json:"total,omitempty"`
-	Page  int `json:"page,omitempty"`
 }
 
 type Result[T any] struct {
@@ -28,13 +29,9 @@ func decodeBodyJson[T any](r *http.Request) (T, error) {
 }
 
 func parseIDFromRequest(r *http.Request) (uuid.UUID, error) {
-	q := chi.URLParam(r, "id")
-	if q == "" {
-		return uuid.Nil, fmt.Errorf("Missing id from query params")
-	}
-	id, err := uuid.Parse(q)
+	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("Missing id from query params")
+		return uuid.Nil, errInvalidID
 	}
 
 	return id, nil
@@ -43,25 +40,13 @@ func parseIDFromRequest(r *http.Request) (uuid.UUID, error) {
 func respondJSON[T any](w http.ResponseWriter, status int, response Result[T], logger *utils.LoggerImpl) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	r, err := json.MarshalIndent(response, "", "  ")
-	if err != nil {
-		logger.Error("Error marshaling response: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		logger.Error("error writing response: %v", err)
 	}
-
-	json.NewEncoder(w).Encode(response)
-	logger.Info("response: %s\n", r)
 }
 
 func respondSingle[T any](w http.ResponseWriter, status int, item T, logger *utils.LoggerImpl) {
-	logger.Info("Responding with single item")
-
-	response := Result[T]{
-		Data: item,
-	}
-
-	respondJSON(w, status, response, logger)
+	respondJSON(w, status, Result[T]{Data: item}, logger)
 }
 
 func respondList[T any](w http.ResponseWriter, items []T, logger *utils.LoggerImpl) {
@@ -79,20 +64,12 @@ func respondList[T any](w http.ResponseWriter, items []T, logger *utils.LoggerIm
 
 func respondError(w http.ResponseWriter, status int, err error, logger *utils.LoggerImpl) {
 	logger.Error(err.Error())
-	msg := err.Error()
-	response := Result[any]{
-		Error: msg,
-	}
-
-	respondJSON(w, status, response, logger)
+	respondJSON(w, status, Result[any]{Error: err.Error()}, logger)
 }
-
-type HandlerFn func(w http.ResponseWriter, r *http.Request)
 
 type HandlerImpl struct {
 	Path   string
 	logger *utils.LoggerImpl
-	Routes func() chi.Router
 }
 
 func NewHandler(path string) *HandlerImpl {

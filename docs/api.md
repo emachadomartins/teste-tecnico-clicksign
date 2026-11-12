@@ -6,26 +6,27 @@ A API é REST, com JSON no corpo das requisições e das respostas. A única exc
 
 ## Endereço base
 
-| Como a API está rodando | Endereço base |
-|---|---|
-| Desenvolvimento (`make dev`) | `http://localhost:3000` |
-| Docker Compose completo | `http://localhost:5000/api` (o nginx do front repassa para a API) |
+| Como a API está rodando      | Endereço base                                                     |
+| ---------------------------- | ----------------------------------------------------------------- |
+| Desenvolvimento (`make dev`) | `http://localhost:3000`                                           |
+| Docker Compose completo      | `http://localhost:5000/api` (o nginx do front repassa para a API) |
 
 Todos os exemplos abaixo usam o endereço de desenvolvimento.
 
 ## Resumo das rotas
 
-| Método | Rota | O que faz |
-|---|---|---|
-| `GET` | `/` | Verifica se a API está no ar |
-| `GET` | `/project` | Lista projetos, com busca, filtro e ordenação |
-| `POST` | `/project` | Cria um projeto |
-| `GET` | `/project/{id}` | Busca um projeto |
-| `PUT` | `/project/{id}` | Atualiza um projeto |
-| `DELETE` | `/project/{id}` | Remove um projeto e a sua capa |
-| `PATCH` | `/project/{id}/favorite` | Marca ou desmarca um projeto como favorito |
-| `POST` | `/project/{id}/cover` | Envia ou substitui a capa do projeto |
-| `GET` | `/project/{id}/cover` | Devolve a imagem da capa |
+| Método   | Rota                     | O que faz                                     |
+| -------- | ------------------------ | --------------------------------------------- |
+| `GET`    | `/`                      | Verifica se a API está no ar                  |
+| `GET`    | `/project`               | Lista projetos, com busca, filtro e ordenação |
+| `POST`   | `/project`               | Cria um projeto                               |
+| `GET`    | `/project/{id}`          | Busca um projeto                              |
+| `PUT`    | `/project/{id}`          | Atualiza um projeto                           |
+| `DELETE` | `/project/{id}`          | Remove um projeto e a sua capa                |
+| `PATCH`  | `/project/{id}/favorite` | Marca ou desmarca um projeto como favorito    |
+| `POST`   | `/project/{id}/cover`    | Envia ou substitui a capa do projeto          |
+| `GET`    | `/project/{id}/cover`    | Devolve a imagem da capa                      |
+| `DELETE` | `/project/{id}/cover`    | Remove a capa do projeto                      |
 
 ## Formato das respostas
 
@@ -39,17 +40,26 @@ As respostas em JSON seguem sempre o mesmo envelope:
 }
 ```
 
-| Campo | Quando aparece |
-|---|---|
-| `data` | Sempre. O projeto, a lista de projetos ou `null` em caso de erro |
+| Campo      | Quando aparece                                                                         |
+| ---------- | -------------------------------------------------------------------------------------- |
+| `data`     | Sempre. O projeto, a lista de projetos ou `null` em caso de erro                       |
 | `metadata` | Só na listagem, com o `total` de itens devolvidos. É omitido quando a lista está vazia |
-| `error` | Só em caso de erro, com a mensagem |
+| `error`    | Só em caso de erro, com a mensagem                                                     |
 
 Exemplo de erro:
 
 ```json
-{ "data": null, "error": "record not found" }
+{ "data": null, "error": "project not found" }
 ```
+
+Os códigos de erro seguem o mesmo padrão em todas as rotas:
+
+| Status | Quando                                                                                                                                                  |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `400`  | Requisição inválida: JSON malformado, ID que não é um UUID, campo obrigatório ausente ou regra de validação não atendida. A mensagem explica o problema |
+| `404`  | O projeto não existe, ou não tem capa                                                                                                                   |
+| `413`  | O arquivo de capa passa do tamanho máximo                                                                                                               |
+| `500`  | Erro inesperado no servidor. A mensagem é sempre `internal server error`, e o detalhe fica só no log da API                                             |
 
 As rotas de remoção respondem `204 No Content`, sem corpo. A rota de leitura da capa responde com a própria imagem.
 
@@ -69,15 +79,15 @@ As rotas de remoção respondem `204 No Content`, sem corpo. A rota de leitura d
 }
 ```
 
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `id` | UUID | Identificador, gerado pela API |
-| `created_at`, `updated_at` | data e hora (RFC 3339) | Preenchidos pela API |
-| `name` | texto | Nome do projeto |
-| `client` | texto | Nome do cliente |
-| `is_favorite` | booleano | Se o projeto é favorito. Começa como `false` |
-| `initial_date`, `final_date` | data (`YYYY-MM-DD`) | Datas de início e de término, sem horário |
-| `cover_url` | texto, opcional | Nome do arquivo da capa. Só aparece quando o projeto tem capa. Para obter a imagem, use `GET /project/{id}/cover` |
+| Campo                        | Tipo                   | Descrição                                                                                                         |
+| ---------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `id`                         | UUID                   | Identificador, gerado pela API                                                                                    |
+| `created_at`, `updated_at`   | data e hora (RFC 3339) | Preenchidos pela API                                                                                              |
+| `name`                       | texto                  | Nome do projeto                                                                                                   |
+| `client`                     | texto                  | Nome do cliente                                                                                                   |
+| `is_favorite`                | booleano               | Se o projeto é favorito. Começa como `false`                                                                      |
+| `initial_date`, `final_date` | data (`YYYY-MM-DD`)    | Datas de início e de término, sem horário                                                                         |
+| `cover_url`                  | texto, opcional        | Nome do arquivo da capa. Só aparece quando o projeto tem capa. Para obter a imagem, use `GET /project/{id}/cover` |
 
 As datas de início e término usam sempre o formato `YYYY-MM-DD`, tanto na entrada quanto na saída. Qualquer outro formato é recusado.
 
@@ -97,17 +107,17 @@ Lista os projetos.
 
 **Parâmetros de query** (todos opcionais):
 
-| Parâmetro | Valores | Descrição |
-|---|---|---|
-| `term` | texto | Busca por palavras. Cada palavra precisa aparecer no nome **ou** no cliente. A busca ignora maiúsculas e acentos: `cachaca` encontra "Cachaça" |
-| `favorites_only` | `true` | Devolve só os favoritos |
-| `sort_by` | `name`, `initial_date`, `final_date` | Ordenação (veja abaixo). Padrão: `name` |
+| Parâmetro        | Valores                              | Descrição                                                                                                                                      |
+| ---------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `term`           | texto                                | Busca por palavras. Cada palavra precisa aparecer no nome **ou** no cliente. A busca ignora maiúsculas e acentos: `cachaca` encontra "Cachaça" |
+| `favorites_only` | `true`                               | Devolve só os favoritos                                                                                                                        |
+| `sort_by`        | `name`, `initial_date`, `final_date` | Ordenação (veja abaixo). Padrão: `name`                                                                                                        |
 
-| `sort_by` | Ordem |
-|---|---|
-| `name` | Alfabética pelo nome (padrão) |
+| `sort_by`      | Ordem                                                                            |
+| -------------- | -------------------------------------------------------------------------------- |
+| `name`         | Alfabética pelo nome (padrão)                                                    |
 | `initial_date` | Data de início, da mais recente para a mais antiga (iniciados mais recentemente) |
-| `final_date` | Data de término, da mais próxima para a mais distante (prazo mais próximo) |
+| `final_date`   | Data de término, da mais próxima para a mais distante (prazo mais próximo)       |
 
 Um valor de `sort_by` desconhecido usa a ordenação por nome. Os filtros podem ser combinados.
 
@@ -130,10 +140,10 @@ curl "http://localhost:3000/project?term=etanol%20pinga&favorites_only=true&sort
 
 Sem resultados, a resposta é `{ "data": [] }`, sem o `metadata`.
 
-| Status | Quando |
-|---|---|
-| `200` | Sucesso, inclusive com a lista vazia |
-| `500` | Falha ao consultar o banco |
+| Status | Quando                               |
+| ------ | ------------------------------------ |
+| `200`  | Sucesso, inclusive com a lista vazia |
+| `500`  | Falha ao consultar o banco           |
 
 ---
 
@@ -152,22 +162,22 @@ Cria um projeto.
 }
 ```
 
-| Campo | Regra |
-|---|---|
-| `name` | Obrigatório, não pode ser vazio |
-| `client` | Obrigatório, não pode ser vazio |
-| `initial_date` | Obrigatório, no formato `YYYY-MM-DD` |
-| `final_date` | Obrigatório, no formato `YYYY-MM-DD`, e não pode ser antes da `initial_date` |
+| Campo          | Regra                                                                        |
+| -------------- | ---------------------------------------------------------------------------- |
+| `name`         | Obrigatório, não pode ser vazio                                              |
+| `client`       | Obrigatório, não pode ser vazio                                              |
+| `initial_date` | Obrigatório, no formato `YYYY-MM-DD`                                         |
+| `final_date`   | Obrigatório, no formato `YYYY-MM-DD`, e não pode ser antes da `initial_date` |
 
 O projeto é criado como não favorito e sem capa. A capa é enviada depois, pela rota `POST /project/{id}/cover`.
 
 **Resposta:** `201 Created`, com o projeto criado em `data`.
 
-| Status | Quando |
-|---|---|
-| `201` | Projeto criado |
-| `400` | O corpo não é um JSON válido, ou uma data está fora do formato `YYYY-MM-DD` |
-| `500` | Um campo obrigatório está vazio, a data final é anterior à inicial, ou houve falha ao gravar no banco |
+| Status | Quando                                                                                                                                                                                   |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `201`  | Projeto criado                                                                                                                                                                           |
+| `400`  | O corpo não é um JSON válido, uma data está fora do formato `YYYY-MM-DD`, falta um campo obrigatório (a mensagem lista quais), um campo está vazio, ou a data final é anterior à inicial |
+| `500`  | Falha ao gravar no banco                                                                                                                                                                 |
 
 ---
 
@@ -177,11 +187,11 @@ Busca um projeto pelo ID.
 
 **Resposta:** `200 OK`, com o projeto em `data`.
 
-| Status | Quando |
-|---|---|
-| `200` | Projeto encontrado |
-| `400` | O ID não é um UUID válido |
-| `404` | O projeto não existe |
+| Status | Quando                    |
+| ------ | ------------------------- |
+| `200`  | Projeto encontrado        |
+| `400`  | O ID não é um UUID válido |
+| `404`  | O projeto não existe      |
 
 ---
 
@@ -204,11 +214,11 @@ Esta rota não altera o favorito nem a capa, que têm rotas próprias.
 
 **Resposta:** `200 OK`, com o projeto atualizado em `data`.
 
-| Status | Quando |
-|---|---|
-| `200` | Projeto atualizado |
-| `400` | O ID não é um UUID válido |
-| `404` | O projeto não existe, ou o resultado da alteração não passa na validação |
+| Status | Quando                                                                                                      |
+| ------ | ----------------------------------------------------------------------------------------------------------- |
+| `200`  | Projeto atualizado                                                                                          |
+| `400`  | O ID não é um UUID válido, o corpo não é um JSON válido, ou o resultado da alteração não passa na validação |
+| `404`  | O projeto não existe                                                                                        |
 
 ---
 
@@ -218,11 +228,11 @@ Remove o projeto e apaga o arquivo da capa, se houver.
 
 **Resposta:** `204 No Content`, sem corpo.
 
-| Status | Quando |
-|---|---|
-| `204` | Projeto removido |
-| `400` | O ID não é um UUID válido |
-| `404` | O projeto não existe |
+| Status | Quando                    |
+| ------ | ------------------------- |
+| `204`  | Projeto removido          |
+| `400`  | O ID não é um UUID válido |
+| `404`  | O projeto não existe      |
 
 ---
 
@@ -236,17 +246,17 @@ Marca ou desmarca o projeto como favorito. O valor é informado explicitamente (
 { "is_favorite": true }
 ```
 
-| Campo | Regra |
-|---|---|
+| Campo         | Regra                 |
+| ------------- | --------------------- |
 | `is_favorite` | Obrigatório, booleano |
 
 **Resposta:** `200 OK`, com o projeto atualizado em `data`.
 
-| Status | Quando |
-|---|---|
-| `200` | Favorito atualizado |
-| `400` | O ID não é um UUID válido, ou o `is_favorite` não foi enviado |
-| `404` | O projeto não existe |
+| Status | Quando                                                        |
+| ------ | ------------------------------------------------------------- |
+| `200`  | Favorito atualizado                                           |
+| `400`  | O ID não é um UUID válido, ou o `is_favorite` não foi enviado |
+| `404`  | O projeto não existe                                          |
 
 ---
 
@@ -260,20 +270,21 @@ Envia a imagem de capa do projeto. Se o projeto já tiver uma capa, ela é subst
 curl -X POST http://localhost:3000/project/<id>/cover -F "cover=@capa.jpg"
 ```
 
-| Regra | Detalhe |
-|---|---|
-| Tipos aceitos | JPEG e PNG |
-| Tamanho máximo | 5 MB |
-| Validação do tipo | Feita pelo **conteúdo** do arquivo (os primeiros bytes), e não pela extensão nem pelo `Content-Type` enviado. Um arquivo renomeado para `.jpg` que não seja uma imagem é recusado |
-| Nome do arquivo salvo | Gerado pela API: o ID do projeto mais a extensão (`.jpg` ou `.png`). O nome do arquivo enviado é ignorado |
+| Regra                 | Detalhe                                                                                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tipos aceitos         | JPEG e PNG                                                                                                                                                                        |
+| Tamanho máximo        | 5 MB                                                                                                                                                                              |
+| Validação do tipo     | Feita pelo **conteúdo** do arquivo (os primeiros bytes), e não pela extensão nem pelo `Content-Type` enviado. Um arquivo renomeado para `.jpg` que não seja uma imagem é recusado |
+| Nome do arquivo salvo | Gerado pela API: o ID do projeto mais a extensão (`.jpg` ou `.png`). O nome do arquivo enviado é ignorado                                                                         |
 
 **Resposta:** `200 OK`, com o projeto atualizado em `data`, incluindo o `cover_url`.
 
-| Status | Quando |
-|---|---|
-| `200` | Capa salva |
-| `400` | O ID não é um UUID válido, o campo `cover` não foi enviado, ou o arquivo passa de 5 MB |
-| `404` | O projeto não existe, ou o arquivo não é JPEG nem PNG |
+| Status | Quando                                                                                      |
+| ------ | ------------------------------------------------------------------------------------------- |
+| `200`  | Capa salva                                                                                  |
+| `400`  | O ID não é um UUID válido, o campo `cover` não foi enviado, ou o arquivo não é JPEG nem PNG |
+| `404`  | O projeto não existe                                                                        |
+| `413`  | O arquivo passa de 5 MB                                                                     |
 
 ---
 
@@ -283,13 +294,27 @@ Devolve a imagem da capa do projeto.
 
 **Resposta:** `200 OK`, com os bytes da imagem e o `Content-Type` correspondente (`image/jpeg` ou `image/png`).
 
-O front acrescenta um parâmetro `?v=<cover_url>` a essa URL. A API ignora esse parâmetro. Ele serve só para o navegador baixar a imagem nova quando a capa é trocada, em vez de reaproveitar a antiga do cache.
+O front acrescenta um parâmetro `?v=<updated_at>` a essa URL. A API ignora esse parâmetro. Ele serve só para o navegador baixar a imagem nova quando a capa é trocada, em vez de reaproveitar a antiga do cache.
 
-| Status | Quando |
-|---|---|
-| `200` | Imagem devolvida |
-| `400` | O ID não é um UUID válido |
-| `404` | O projeto não existe, não tem capa, ou o arquivo não foi encontrado no disco |
+| Status | Quando                                                                       |
+| ------ | ---------------------------------------------------------------------------- |
+| `200`  | Imagem devolvida                                                             |
+| `400`  | O ID não é um UUID válido                                                    |
+| `404`  | O projeto não existe, não tem capa, ou o arquivo não foi encontrado no disco |
+
+---
+
+### `DELETE /project/{id}/cover`
+
+Remove a capa do projeto: apaga o arquivo e limpa o `cover_url`. Se o arquivo já não existir no disco, a referência no projeto é limpa mesmo assim.
+
+**Resposta:** `204 No Content`, sem corpo.
+
+| Status | Quando                                |
+| ------ | ------------------------------------- |
+| `204`  | Capa removida                         |
+| `400`  | O ID não é um UUID válido             |
+| `404`  | O projeto não existe, ou não tem capa |
 
 ## CORS
 

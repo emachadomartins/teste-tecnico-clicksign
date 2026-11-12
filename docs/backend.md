@@ -40,14 +40,14 @@ requisição HTTP
               └─► storage     salva, lê e apaga os arquivos de capa
 ```
 
-| Camada | Responsabilidade | Não sabe |
-|---|---|---|
-| `handler` | Traduzir HTTP em chamadas ao service, e o resultado em JSON e status | Como os dados são guardados |
-| `service` | Regras de negócio: validar, aplicar uma atualização parcial, coordenar banco e arquivos | Nada de HTTP |
-| `repository` | Queries no banco: filtros, ordenação, inserção e atualização | Regras de negócio |
-| `storage` | Gravar, ler e apagar arquivos | Que os arquivos são capas de projetos |
+| Camada       | Responsabilidade                                                                        | Não sabe                              |
+| ------------ | --------------------------------------------------------------------------------------- | ------------------------------------- |
+| `handler`    | Traduzir HTTP em chamadas ao service, e o resultado em JSON e status                    | Como os dados são guardados           |
+| `service`    | Regras de negócio: validar, aplicar uma atualização parcial, coordenar banco e arquivos | Nada de HTTP                          |
+| `repository` | Queries no banco: filtros, ordenação, inserção e atualização                            | Regras de negócio                     |
+| `storage`    | Gravar, ler e apagar arquivos                                                           | Que os arquivos são capas de projetos |
 
-As dependências são criadas no `router`, em ordem: a conexão com o banco, o storage, o repository, e por fim o handler, que cria o service.
+Todas as dependências são criadas num único lugar, o `router`, em ordem: a conexão com o banco, o storage, o repository, o service e, por fim, o handler. Cada camada recebe as dependências prontas no construtor, em vez de criá-las por conta própria.
 
 O `context` de cada requisição (`r.Context()`) é repassado do handler até o GORM. Se o cliente cancelar a requisição, a query no banco também é cancelada.
 
@@ -55,26 +55,45 @@ O `context` de cada requisição (`r.Context()`) é repassado do handler até o 
 
 A tabela é criada pelo `AutoMigrate` do GORM a partir da struct `ProjectModel`, quando a API inicia.
 
-| Campo Go | Coluna | Tipo |
-|---|---|---|
-| `ID` | `id` | UUID, gerado pela aplicação |
-| `CreatedAt`, `UpdatedAt` | `created_at`, `updated_at` | Data e hora, preenchidas pelo GORM |
-| `Name` | `name` | Texto |
-| `Client` | `client` | Texto |
-| `IsFavorite` | `is_favorite` | Booleano |
-| `InitialDate`, `FinalDate` | `initial_date`, `final_date` | Data, pelo tipo `model.Date` |
-| `CoverURL` | `cover_url` | Texto, opcional (o nome do arquivo da capa) |
+| Campo Go                   | Coluna                       | Tipo                                        |
+| -------------------------- | ---------------------------- | ------------------------------------------- |
+| `ID`                       | `id`                         | UUID, gerado pela aplicação                 |
+| `CreatedAt`, `UpdatedAt`   | `created_at`, `updated_at`   | Data e hora, preenchidas pelo GORM          |
+| `Name`                     | `name`                       | Texto                                       |
+| `Client`                   | `client`                     | Texto                                       |
+| `IsFavorite`               | `is_favorite`                | Booleano                                    |
+| `InitialDate`, `FinalDate` | `initial_date`, `final_date` | Data, pelo tipo `model.Date`                |
+| `CoverURL`                 | `cover_url`                  | Texto, opcional (o nome do arquivo da capa) |
 
 O tipo **`model.Date`** existe porque o `time.Time` do Go só aceita datas com horário no JSON (`2026-11-30T00:00:00Z`). Datas de início e término de projeto são datas puras, sem horário. O `Date` aceita e devolve `YYYY-MM-DD` no JSON, e grava como data no banco, sem o risco de o fuso horário mudar o dia.
 
 ## Payloads e validação
 
-| Payload | Usado em | Detalhe |
-|---|---|---|
-| `ProjectPayload` | `POST /project` e `PUT /project/{id}` | Campos ponteiro: `nil` significa "não enviado". É o que permite a atualização parcial |
-| `FavoritePayload` | `PATCH /project/{id}/favorite` | Um único campo, `is_favorite` |
+| Payload           | Usado em                              | Detalhe                                                                               |
+| ----------------- | ------------------------------------- | ------------------------------------------------------------------------------------- |
+| `ProjectPayload`  | `POST /project` e `PUT /project/{id}` | Campos ponteiro: `nil` significa "não enviado". É o que permite a atualização parcial |
+| `FavoritePayload` | `PATCH /project/{id}/favorite`        | Um único campo, `is_favorite`                                                         |
 
 As regras do projeto ficam no método `ProjectModel.Validate()`: nome e cliente preenchidos, as duas datas preenchidas, e a data de início não pode ser depois da de término. Na atualização, a validação roda **depois** de aplicar as alterações, para as regras que comparam dois campos usarem os valores já gravados.
+
+Na criação, antes de montar o projeto, o `ProjectPayload.RequiredFieldsError()` verifica se todos os campos obrigatórios foram enviados, e a mensagem lista os que faltam.
+
+## Tratamento de erros
+
+As camadas devolvem erros com significado, e o handler é quem decide o status HTTP de cada um:
+
+| Erro                            | Onde nasce                                               | Status |
+| ------------------------------- | -------------------------------------------------------- | ------ |
+| `*model.ValidationError`        | `Validate()` e `RequiredFieldsError()`                   | `400`  |
+| `storage.ErrInvalidContentType` | `LocalStorage.Save`, quando o arquivo não é JPEG nem PNG | `400`  |
+| `*http.MaxBytesError`           | Leitura do upload acima de 5 MB                          | `413`  |
+| `model.ErrNotFound`             | Repository, quando o projeto não existe                  | `404`  |
+| `model.ErrNoCover`              | Service, quando o projeto não tem capa                   | `404`  |
+| Qualquer outro                  | Falhas inesperadas, como uma queda do banco              | `500`  |
+
+A tradução fica numa única função, `errorStatus` (em `handler/errors.go`), usada por todos os handlers. Nos erros 500, a resposta traz só `internal server error`, e o erro original vai para o log, para não expor detalhes internos (como mensagens do banco) para quem chama a API.
+
+O middleware `Recoverer` do chi fica como rede de segurança: um panic inesperado vira uma resposta 500, em vez de derrubar a conexão.
 
 ## Busca, filtro e ordenação
 
@@ -113,10 +132,10 @@ As variáveis são lidas em `internal/config`. Se existir um arquivo `.env` na p
 
 Os testes ficam ao lado de cada arquivo (`*_test.go`) e usam só a biblioteca padrão do Go, em formato de tabela.
 
-| Pacote | O que é testado |
-|---|---|
-| `utils` | `NormalizeWord`, `WordToTerms` e `DetectFileExtension` |
-| `model` | O tipo `Date` (JSON, `Value` e `Scan`), o `Validate`, o `SortBy` e o `NewBaseModel` |
+| Pacote    | O que é testado                                                                                           |
+| --------- | --------------------------------------------------------------------------------------------------------- |
+| `utils`   | `NormalizeWord`, `WordToTerms` e `DetectFileExtension`                                                    |
+| `model`   | O tipo `Date` (JSON, `Value` e `Scan`), o `Validate`, o `SortBy` e o `NewBaseModel`                       |
 | `storage` | Salvar, ler e apagar capas numa pasta temporária, incluindo a garantia de que o arquivo é gravado inteiro |
 
 ```sh
@@ -125,12 +144,12 @@ cd api && go test ./...
 
 ## Dependências
 
-| Pacote | Para quê |
-|---|---|
-| [`github.com/go-chi/chi`](https://github.com/go-chi/chi) | Roteador HTTP. Compatível com o `net/http` da biblioteca padrão: os handlers são `http.HandlerFunc` comuns |
-| [`github.com/go-chi/cors`](https://github.com/go-chi/cors) | Middleware de CORS |
-| [`gorm.io/gorm`](https://gorm.io) e `gorm.io/driver/postgres` | ORM: monta as queries, faz o mapeamento das structs e cria a tabela com o `AutoMigrate`. O driver usa o `pgx` por baixo |
-| [`github.com/google/uuid`](https://github.com/google/uuid) | Geração e validação dos IDs |
-| [`github.com/joho/godotenv`](https://github.com/joho/godotenv) | Carrega o arquivo `.env` em desenvolvimento |
-| [`golang.org/x/text`](https://pkg.go.dev/golang.org/x/text) | Remoção de acentos na normalização da busca |
-| [`github.com/air-verse/air`](https://github.com/air-verse/air) | Recarga automática da API em desenvolvimento. Registrado como ferramenta no `go.mod` e executado com `go tool air` |
+| Pacote                                                         | Para quê                                                                                                                |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [`github.com/go-chi/chi`](https://github.com/go-chi/chi)       | Roteador HTTP. Compatível com o `net/http` da biblioteca padrão: os handlers são `http.HandlerFunc` comuns              |
+| [`github.com/go-chi/cors`](https://github.com/go-chi/cors)     | Middleware de CORS                                                                                                      |
+| [`gorm.io/gorm`](https://gorm.io) e `gorm.io/driver/postgres`  | ORM: monta as queries, faz o mapeamento das structs e cria a tabela com o `AutoMigrate`. O driver usa o `pgx` por baixo |
+| [`github.com/google/uuid`](https://github.com/google/uuid)     | Geração e validação dos IDs                                                                                             |
+| [`github.com/joho/godotenv`](https://github.com/joho/godotenv) | Carrega o arquivo `.env` em desenvolvimento                                                                             |
+| [`golang.org/x/text`](https://pkg.go.dev/golang.org/x/text)    | Remoção de acentos na normalização da busca                                                                             |
+| [`github.com/air-verse/air`](https://github.com/air-verse/air) | Recarga automática da API em desenvolvimento. Registrado como ferramenta no `go.mod` e executado com `go tool air`      |

@@ -1,12 +1,33 @@
 package model
 
-import "fmt"
+import "strings"
 
 type ProjectPayload struct {
 	Name        *string `json:"name"`
 	Client      *string `json:"client"`
 	InitialDate *Date   `json:"initial_date"`
 	FinalDate   *Date   `json:"final_date"`
+}
+
+func (p ProjectPayload) RequiredFieldsError() error {
+	var missing []string
+	if p.Name == nil {
+		missing = append(missing, "name")
+	}
+	if p.Client == nil {
+		missing = append(missing, "client")
+	}
+	if p.InitialDate == nil {
+		missing = append(missing, "initial_date")
+	}
+	if p.FinalDate == nil {
+		missing = append(missing, "final_date")
+	}
+
+	if len(missing) > 0 {
+		return NewValidationError("missing required fields: " + strings.Join(missing, ", "))
+	}
+	return nil
 }
 
 type ProjectModel struct {
@@ -25,19 +46,19 @@ type FavoritePayload struct {
 
 func (p *ProjectModel) Validate() error {
 	if p.Name == "" {
-		return fmt.Errorf("Name is required")
+		return NewValidationError("Name is required")
 	}
 	if p.Client == "" {
-		return fmt.Errorf("Client is required")
+		return NewValidationError("Client is required")
 	}
 	if p.InitialDate.IsZero() {
-		return fmt.Errorf("InitialDate is required")
+		return NewValidationError("InitialDate is required")
 	}
 	if p.FinalDate.IsZero() {
-		return fmt.Errorf("FinalDate is required")
+		return NewValidationError("FinalDate is required")
 	}
 	if p.InitialDate.After(p.FinalDate.Time) {
-		return fmt.Errorf("InitialDate cannot be after FinalDate")
+		return NewValidationError("InitialDate cannot be after FinalDate")
 	}
 
 	return nil

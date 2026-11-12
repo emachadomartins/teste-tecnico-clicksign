@@ -5,11 +5,13 @@ import (
 	"gerenciador-de-projetos-back/internal/database"
 	"gerenciador-de-projetos-back/internal/handler"
 	"gerenciador-de-projetos-back/internal/repository"
+	"gerenciador-de-projetos-back/internal/service"
 	"gerenciador-de-projetos-back/internal/storage"
 	"gerenciador-de-projetos-back/internal/utils"
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 )
 
@@ -26,6 +28,7 @@ func New(c config.Config, l *utils.LoggerImpl) *chi.Mux {
 	l.Info("Creating router")
 	r := chi.NewRouter()
 
+	r.Use(middleware.Recoverer)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   c.AllowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
@@ -42,7 +45,8 @@ func New(c config.Config, l *utils.LoggerImpl) *chi.Mux {
 	coverImageStorage := storage.NewLocalStorage(c.UploadsBasePath)
 
 	projectRepo := repository.NewProjectRepository(db)
-	projectHandler := handler.NewProjectHandler(projectRepo, coverImageStorage)
+	projectService := service.NewProjectService(utils.NewLogger("service"), projectRepo, coverImageStorage)
+	projectHandler := handler.NewProjectHandler(projectService)
 
 	r.Mount(projectHandler.Path, projectHandler.Routes())
 

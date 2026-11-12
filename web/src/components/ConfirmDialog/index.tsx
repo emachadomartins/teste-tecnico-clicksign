@@ -8,8 +8,8 @@ type ConfirmDialogProps = {
   title: string;
   message: ReactNode;
   icon?: IconName;
-  confirmLabel?: string;
   isLoading?: boolean;
+  error?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -20,6 +20,7 @@ export const ConfirmDialog = ({
   message,
   icon,
   isLoading = false,
+  error,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => {
@@ -62,6 +63,12 @@ export const ConfirmDialog = ({
         {title}
       </h2>
       <p className="confirm-dialog-message">{message}</p>
+
+      {error && (
+        <p className="confirm-dialog-error" role="alert">
+          {error}
+        </p>
+      )}
 
       <div className="confirm-dialog-actions">
         <Button
