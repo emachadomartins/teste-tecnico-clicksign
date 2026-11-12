@@ -47,9 +47,9 @@ export const ConfirmDialog = ({
         <div className="confirm-dialog-icon">
           {
             <Icon
-              color="#FFFFFF"
+              color="white"
               size={20}
-              circleColor="#695CCD"
+              circleColor="primary"
               circleSize={64}
               circle
               icon={icon}

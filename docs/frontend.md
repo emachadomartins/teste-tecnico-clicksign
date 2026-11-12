@@ -13,7 +13,8 @@ web/
 │   ├── main.tsx             Ponto de entrada: fontes, CSS global e o router
 │   ├── router.tsx           Definição das rotas
 │   ├── App.tsx              Layout comum: a top-bar e a área das páginas
-│   ├── index.css            Estilos globais e reset
+│   ├── index.css            Variáveis de cor, estilos globais e reset
+│   ├── theme.ts             As cores para uso nos componentes TSX
 │   ├── api/                 Comunicação com a API
 │   ├── pages/               Uma pasta por página (rota)
 │   ├── components/          Componentes reutilizáveis
@@ -27,6 +28,18 @@ web/
 ```
 
 Cada componente e cada página tem a sua própria pasta, com um `index.tsx` e um `styles.css`. Os testes ficam ao lado dos arquivos testados (`*.test.ts`).
+
+## Cores
+
+As cores são definidas uma única vez, como variáveis CSS no `:root` do `index.css`, com nomes que descrevem o papel de cada uma (`--color-primary`, `--color-danger`, `--color-text-muted`...). Os arquivos CSS usam sempre as variáveis, e nunca o valor da cor.
+
+Nos componentes TSX, as cores vêm do `theme.ts`, que aponta para as mesmas variáveis:
+
+```tsx
+<Icon icon="trash" color="primary" size={20} />
+```
+
+As props de cor do `Icon` (`color`, `fill` e `circleColor`) só aceitam os nomes do `theme.ts`, então o TypeScript recusa um valor hex escrito direto no componente. Para mudar uma cor do app inteiro, basta alterar a variável no `index.css`.
 
 ## Rotas
 

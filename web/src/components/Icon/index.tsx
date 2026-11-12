@@ -22,6 +22,7 @@ import {
   type LucideProps,
 } from "lucide-react";
 
+import { colors, type ColorName } from "../../theme";
 import "./styles.css";
 
 const icons = {
@@ -58,21 +59,21 @@ export const IconComponent = ({ name, ...props }: IconProps) => {
 
 type BaseProps = {
   icon: IconName;
-  color: string;
+  color?: ColorName;
   size: number;
-  fill?: string;
+  fill?: ColorName | "none";
   className?: string;
   shadow?: boolean;
   stroke?: number;
 } & (
   | {
       circle: true;
-      circleColor: string;
+      circleColor: ColorName;
       circleSize: number;
     }
   | {
       circle?: false;
-      circleColor?: string;
+      circleColor?: ColorName;
       circleSize?: number;
     }
 );
@@ -112,47 +113,43 @@ export const Icon = ({
     .filter(Boolean)
     .join(" ");
 
-  const circleStyle: React.CSSProperties | undefined = circle
-    ? {
-        width: circleSize,
-        height: circleSize,
-        background: circleColor,
-        borderRadius: "50%",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }
-    : undefined;
+  const wrapperStyle: React.CSSProperties = {
+    color: color ? colors[color] : undefined,
+    ...(circle && {
+      width: circleSize,
+      height: circleSize,
+      background: circleColor ? colors[circleColor] : undefined,
+    }),
+  };
+
+  const svg = (
+    <IconComponent
+      name={icon}
+      size={size}
+      color="currentColor"
+      fill={fill === "none" ? "none" : "currentColor"}
+      style={fill === "none" ? undefined : { fill: colors[fill] }}
+      strokeWidth={stroke}
+    />
+  );
 
   if (onClick) {
     return (
       <button
         type="button"
         className={classes}
-        style={circleStyle}
+        style={wrapperStyle}
         onClick={onClick}
         aria-label={label}
       >
-        <IconComponent
-          color={color}
-          name={icon}
-          size={size}
-          fill={fill}
-          strokeWidth={stroke}
-        />
+        {svg}
       </button>
     );
   }
 
   return (
-    <span className={classes} aria-hidden="true" style={circleStyle}>
-      <IconComponent
-        color={color}
-        name={icon}
-        size={size}
-        fill={fill}
-        strokeWidth={stroke}
-      />
+    <span className={classes} aria-hidden="true" style={wrapperStyle}>
+      {svg}
     </span>
   );
 };

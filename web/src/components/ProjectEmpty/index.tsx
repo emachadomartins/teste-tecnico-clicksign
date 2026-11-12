@@ -8,7 +8,7 @@ export const ProjectEmpty = () => {
       <h2>Nenhum projeto</h2>
       <p>Clique no botão abaixo para criar o primeiro e gerenciá-lo.</p>
       <Button
-        icon={<Icon icon="plus" size={20} color="#ffffff" />}
+        icon={<Icon icon="plus" size={20} color="white" />}
         isLink
         to="/projects/new"
         className="button button--primary"

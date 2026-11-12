@@ -10,7 +10,7 @@
 }
 
 .icon-shadow {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 1));
+  filter: drop-shadow(0 2px 4px var(--color-shadow-strong));
 }
 
 .icon-circle {
@@ -24,6 +24,6 @@ button.icon {
 }
 
 button.icon:focus-visible {
-  outline: 2px solid #695ccd;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }

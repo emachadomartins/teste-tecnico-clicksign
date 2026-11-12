@@ -48,7 +48,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             onClick={handleSearchClick}
             label="Pesquisar"
             icon="search"
-            color="#FFFFFF"
+            color="white"
             size={32}
           />
         ) : (
@@ -57,14 +57,14 @@ export const Topbar: React.FC<TopbarProps> = ({
             onClick={() => handleSearch("")}
             label="Cancelar Pesquisa"
             icon="x"
-            color="#FFFFFF"
+            color="white"
             size={32}
           />
         ))}
       {isSearchActive && (
         <div className="search-box">
           <div className="search-field">
-            <Icon icon="search" color="#695ccd" size={24} aria-hidden="true" />
+            <Icon icon="search" color="primary" size={24} aria-hidden="true" />
             <input
               className="search-input"
               type="text"
@@ -81,7 +81,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             />
             <Icon
               icon="x"
-              color="#695ccd"
+              color="primary"
               size={24}
               label="Fechar busca"
               onClick={handleSearchClick}
@@ -101,7 +101,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                       icon="history"
                       size={24}
                       aria-hidden="true"
-                      color="#717171"
+                      color="textMuted"
                     />
                     {term}
                   </button>

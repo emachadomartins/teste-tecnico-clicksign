@@ -11,7 +11,7 @@
   gap: 4px;
   font-size: 18px;
   line-height: 22px;
-  color: #695ccd;
+  color: var(--color-primary);
 }
 
 .form-input-required {
@@ -19,7 +19,7 @@
   font-size: 14px;
   line-height: 22px;
 
-  color: #717171;
+  color: var(--color-text-muted);
 }
 
 .form-input {
@@ -35,8 +35,8 @@
 
   box-sizing: border-box;
 
-  background: #ffffff;
-  border: 1px solid #717171;
+  background: var(--color-white);
+  border: 1px solid var(--color-text-muted);
   border-radius: 8px;
 }
 
@@ -44,9 +44,9 @@
 .form-input-label-error span,
 .form-input-error-message,
 .form-input-error {
-  color: #c40000;
+  color: var(--color-danger);
 }
 
 .form-input-error {
-  border: 2px solid #c40000;
+  border: 2px solid var(--color-danger);
 }

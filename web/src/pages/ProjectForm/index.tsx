@@ -165,7 +165,7 @@ export const ProjectForm = () => {
   return (
     <div className="project-form-container">
       <Link className="page-back-link" to="/">
-        <Icon icon="arrow-left" color="#695ccd" size={16} />
+        <Icon icon="arrow-left" color="primary" size={16} />
         Voltar
       </Link>
       <div className="project-form-headers">
@@ -221,7 +221,7 @@ export const ProjectForm = () => {
                 icon="upload"
                 size={24}
                 aria-hidden="true"
-                color="#717171"
+                color="textMuted"
               />
               <span className="file-input-text">
                 Escolha uma imagem .jpg ou .png no seu dispositivo
@@ -244,7 +244,7 @@ export const ProjectForm = () => {
                 <div className="cover-field-actions">
                   <Icon
                     icon="trash"
-                    color="#695ccd"
+                    color="primary"
                     className="icon-button"
                     label="Remover capa"
                     onClick={handleRemoveCover}

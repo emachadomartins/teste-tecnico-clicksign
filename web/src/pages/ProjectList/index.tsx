@@ -110,7 +110,7 @@ export const ProjectList = () => {
                 {
                   <Icon
                     icon={openedFilter ? "chevron-up" : "chevron-down"}
-                    color="#695CCD"
+                    color="primary"
                     size={20}
                   />
                 }

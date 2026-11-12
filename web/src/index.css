@@ -1,3 +1,28 @@
+:root {
+  --color-primary: #695ccd;
+  --color-primary-light: #b2a8ff;
+  --color-primary-surface: #f4f2ff;
+  --color-heading: #1f1283;
+  --color-dark: #1c1930;
+  --color-accent: #ffb23d;
+  --color-danger: #c40000;
+  --color-white: #ffffff;
+
+  --color-text: #1e1e1e;
+  --color-text-muted: #717171;
+  --color-text-placeholder: #8c8b93;
+  --color-neutral: #53525d;
+
+  --color-divider: #ececec;
+  --color-border: #e5e5e5;
+
+  --color-shadow: rgba(0, 0, 0, 0.25);
+  --color-shadow-soft: rgba(0, 0, 0, 0.1);
+  --color-shadow-medium: rgba(0, 0, 0, 0.2);
+  --color-shadow-strong: rgba(0, 0, 0, 1);
+  --color-overlay: rgba(18, 18, 18, 0.9);
+}
+
 html,
 body,
 #root {
@@ -5,7 +30,7 @@ body,
   margin: 0;
   overflow: hidden;
   font-family: "Encode Sans Semi Expanded", sans-serif;
-  background: #f4f2ff;
+  background: var(--color-primary-surface);
 }
 
 button,
@@ -32,7 +57,7 @@ select {
   margin: 0;
   font-size: 24px;
   line-height: 30px;
-  color: #1f1283;
+  color: var(--color-heading);
 }
 
 .page-title span {

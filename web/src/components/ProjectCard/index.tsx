@@ -42,7 +42,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           />
         ) : (
           <div className="project-image-placeholder" aria-hidden="true">
-            <Icon icon="layers" color="#FFFFFF" size={80} shadow />
+            <Icon icon="layers" color="white" size={80} shadow />
           </div>
         )}
         <div className="project-actions">
@@ -51,8 +51,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             onClick={() => onFavorite(project)}
             icon="star"
             size={32}
-            color="#FFFFFF"
-            fill={project.isFavorite ? "#FFB23D" : "none"}
+            color="white"
+            fill={project.isFavorite ? "accent" : "none"}
             stroke={1}
             shadow
           />
@@ -64,9 +64,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             }}
             icon="ellipsis"
             size={24}
-            color="#695CCD"
+            color="primary"
             circle
-            circleColor="#FFFFFF"
+            circleColor="white"
             circleSize={32}
             shadow
           />
@@ -80,7 +80,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 >
                   <Icon
                     icon="square-pen"
-                    color="#695ccd"
+                    color="primary"
                     size={24}
                     aria-hidden="true"
                   />
@@ -97,7 +97,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                 >
                   <Icon
                     icon="trash"
-                    color="#695ccd"
+                    color="primary"
                     size={24}
                     aria-hidden="true"
                   />
@@ -117,11 +117,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         </p>
         <div className="project-dates">
           <div className="date">
-            <Icon icon="calendar-plus" size={24} color="#717171" />
+            <Icon icon="calendar-plus" size={24} color="textMuted" />
             <span>{formatLongDate(project.initialDate)}</span>
           </div>
           <div className="date">
-            <Icon icon="calendar-check" size={24} color="#717171" />
+            <Icon icon="calendar-check" size={24} color="textMuted" />
             <span>{formatLongDate(project.finalDate)}</span>
           </div>
         </div>
